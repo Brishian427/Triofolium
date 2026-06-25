@@ -207,3 +207,11 @@
 **Decision:** Expand the live session gate to allow current-session trading while leaving the session gate enabled and preserving cost gate, concentration budget, per-symbol caps, and all 7 hard kills.
 **Rationale:** J6 needs a natural first-order verification, and the actual safety boundary is the Risk Gate plus live hard-kill layer, not the attribution-derived session filter.
 **Consequences:** Restart the live runner with the existing session-start equity baseline `999988.39` so the $1000 session-loss tracker is continuous across the config reload. Phase K remains blocked until a real first order is confirmed.
+
+## 2026-06-25 Principal Verdict Disable Concentration Gate
+
+**Context:** After session-gate relaxation, StrategyV0 produced strong live signals and non-zero trader targets, but the Phase H `35%` max single-symbol concentration gate zeroed the portfolio because only two symbols had tradable target lots.
+**Options:** Keep the 35% cap and remain live-but-idle; relax the cap to 50-60%; disable the concentration gate and rely on Risk Gate hard kills plus session-loss controls as the actual safety boundary.
+**Decision:** Disable the StrategyV0 single-symbol concentration gate for live H2 strict by setting it to the disabled threshold, while keeping cost gate, session gate, FX-only universe, per-symbol XAGUSD cap, per-symbol notional cap, and all Risk Gate hard kills.
+**Rationale:** The principal judged the 35% concentration rule as an attribution-derived optimization that suppressed legitimate conviction trades, not a 14:45 explicit safety requirement. Live safety remains enforced by the 7 hard kills and the $1000 session-loss floor.
+**Consequences:** J-triple-prime can verify first live order naturally at the next bar close. The live runner must restart with the original `999988.39` session baseline so the loss floor remains `998988.39`.

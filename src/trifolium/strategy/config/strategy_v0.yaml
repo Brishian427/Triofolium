@@ -129,7 +129,9 @@ portfolio:
   metals_threshold_pct: '15.0'
   gross_leverage_threshold: '0.35'
   scaling_steps: 101
-  max_single_symbol_concentration_pct: '35'
+  # Disabled by principal verdict: Phase H 35% threshold blocked legitimate
+  # two-symbol conviction targets. Risk Gate hard kills remain the boundary.
+  max_single_symbol_concentration_pct: '100'
   max_symbol_notional_pct: '5'
 risk_gate:
   required_for_live: true

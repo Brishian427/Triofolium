@@ -19,6 +19,8 @@ def test_strategy_v0_config_loads() -> None:
     assert "london_morning" in settings.trader.allowed_sessions
     assert "london_ny_overlap" in settings.trader.allowed_sessions
     assert "ny_afternoon" in settings.trader.allowed_sessions
+    assert settings.portfolio.max_single_symbol_concentration_pct == Decimal("100")
+    assert settings.portfolio.max_symbol_notional_pct == Decimal("5")
 
 
 def test_trader_signal_sizing_and_cross_section() -> None:

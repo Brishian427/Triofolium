@@ -96,6 +96,7 @@
 90. [in_progress 2026-06-25] Verify live runner startup, hard-kill armed status, session baseline equity, and first-order status; live runner is active, but first order is pending because the H2 strict London-morning session gate is currently closed.
 91. [pending 2026-06-25] Phase K: after J6 live order confirmation only, run sandbox `v_absolute_return` exploration and do not auto-deploy it.
 92. [blocked 2026-06-25] J-prime: principal override relaxed H2 session gate and live runner was restarted with original baseline, but first-trade verification remains blocked because portfolio concentration budgeting zeroed current two-symbol targets before Risk Gate submission.
+93. [in_progress 2026-06-25] J-triple-prime: principal verdict disables the StrategyV0 single-symbol concentration gate, preserves Risk Gate hard kills and original session baseline, then restarts live runner for first-order verification.
 
 ## Constraints
 - All project continuity state must live under `D:\Desktop\Nucleus\Triofolium\Sextant`.
@@ -131,6 +132,7 @@
 - H2 strict deployment must preserve the live StrategyV0 interface lock: do not edit `src\trifolium\strategy\v0\strategy.py` during Phase J wiring.
 - Keep H2 strict cost gate, London-morning session gate, FX-only universe, and defensive XAGUSD cap semantics; do not force a first trade outside the allowed session.
 - Phase K exploration must not modify the live H2 strict deployment and must not auto-deploy any absolute-return candidate.
+- J-triple-prime may disable only the StrategyV0 single-symbol concentration gate; do not weaken Risk Gate hard kills, the $1000 session-loss floor, cost gate, session gate, FX-only universe, or XAGUSD per-symbol cap.
 
 ## Risks
 - 2026-06-22: Task Pool instructions may include ambiguous or high-risk work; pause for confirmation if execution would be destructive or outside the recorded goal.
