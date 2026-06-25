@@ -2553,6 +2553,22 @@ Delta:
 - Session baseline: equity `999988.39`; session-loss hard floor `998988.39`; current positions flat.
 - First live order is not yet confirmed because the H2 strict London-morning session gate is currently closed; Phase K remains blocked until J6 first live trade confirmation.
 
+## 2026-06-25 J-Prime Session Override Result
+
+Time: 2026-06-25
+Title: Session gate relaxed but first live order still blocked by concentration budget
+Context: Principal overrode the H2 strict session gate so first-order verification could happen in the current session without disabling the session gate entirely.
+
+Delta:
+- Updated live config to include current-session labels used by the running StrategyV0 code: `london_ny_overlap` and `ny_afternoon`, while preserving the principal labels `london_afternoon` and `ny_morning`.
+- Added `--session-start-equity` to the live runner and relaunched with the original `999988.39` baseline; session-loss hard floor remained `998988.39`.
+- New live runner PID: `38400`; new log: `logs\live_run_20260625_185333.jsonl`.
+- J-prime first-order watchdog found no order after active-session bar closes. Diagnostics showed the trader produced non-zero targets (`USDCAD=0.07`, `AUDUSD=0.14`), but portfolio concentration budgeting zeroed them because a two-symbol target set cannot satisfy the configured `35%` max single-symbol concentration cap.
+- Account remains flat with equity/balance `999988.39`; no Risk Gate order was submitted and no hard kill fired.
+
+Next:
+- J'4/J'5 and Phase K remain blocked until the principal decides whether to relax concentration constraints, change top-N selection to produce at least three non-zero symbols, or accept that H2 strict can remain live but idle under current signal geometry.
+
 ### GOAL
 #### Completion Criteria
 - [x] Initialize `Sextant` continuity files under the workspace root.

@@ -117,7 +117,7 @@
 - 2026-06-25: Verified Phase H with `python -m compileall src scripts tests`, full `pytest tests -q` result `78 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, test source files contain no `MetaTrader5` literal, and Risk Gate mode remains calibration.
 
 ## In Progress
-- 2026-06-25: H2 strict live runner is active under PID `31996` with log `logs\live_run_20260625_172215.jsonl`. Session baseline equity is `999988.39`, session-loss floor is `998988.39`, positions are currently flat, and first live order is pending because the H2 London-morning session gate is currently closed.
+- 2026-06-25: H2 strict live runner is active under PID `38400` with log `logs\live_run_20260625_185333.jsonl`. Session baseline equity remains `999988.39`, session-loss floor remains `998988.39`, positions are currently flat, and first live order is still pending.
 
 ## Not Started
 - 2026-06-22: Task 01 project code scaffold has not been created because Charter environment assumptions are not fully satisfied.
@@ -160,3 +160,4 @@
 - 2026-06-25: Phase J verification before live launch: `python -m compileall src scripts tests` passed, `python -m pytest tests -q` produced `85 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, and test source files contain no `MetaTrader5` literal.
 - 2026-06-25: Live readiness surfaced an MT5 edge case: with zero open positions MT5 reports `margin_level=0.0`; live hard kill and observability now treat margin-level floors as actionable only when positions are open.
 - 2026-06-25: Demo UI is accessible at `http://127.0.0.1:8001` and the live account-state logger is writing `logs\account_state_2026-06-25.jsonl`.
+- 2026-06-25: J-prime session-gate override was applied and verified in live config (`london_morning`, `london_ny_overlap`, `ny_afternoon`, plus principal labels), but the 30-minute first-order watchdog produced no order. Read-only diagnostics showed trader targets `USDCAD=0.07` and `AUDUSD=0.14`, then `apply_portfolio_scaling` zeroed all targets because the `35%` max single-symbol concentration cap is impossible with only two non-zero target symbols. No Risk Gate order was submitted and no hard kill fired.
