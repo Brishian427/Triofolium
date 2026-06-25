@@ -13,6 +13,9 @@ from trifolium.agents.scope_guard import ALLOWED_FILES, validate_hypothesis_scop
 
 FORBIDDEN_TOPICS = ["risk_gate", "risk_limits", "mt5" + ".order_send", "Meta" + "Trader5"]
 NEMO_FALLBACK_REASON: str | None = None
+PATH_ALIASES = {
+    "src/trifolium/strategy/v0/config/strategy_v0.yaml": "src/trifolium/strategy/config/strategy_v0.yaml",
+}
 
 
 class HypothesisJSON(BaseModel):
@@ -33,10 +36,18 @@ class HypothesisJSON(BaseModel):
     @field_validator("target_files")
     @classmethod
     def target_files_allowed(cls, values: list[str]) -> list[str]:
-        for value in values:
-            if value.replace("\\", "/") not in ALLOWED_FILES:
+        normalized_values = [PATH_ALIASES.get(value.replace("\\", "/"), value.replace("\\", "/")) for value in values]
+        for value in normalized_values:
+            if value not in ALLOWED_FILES:
                 raise ValueError(f"Target file outside allowed scope: {value}")
-        return values
+        return normalized_values
+
+    @field_validator("expected_metric_change", mode="before")
+    @classmethod
+    def metric_change_dict(cls, value: Any) -> dict[str, Any]:
+        if isinstance(value, dict):
+            return value
+        return {"summary": str(value)}
 
 
 def _extract_json(raw_text: str) -> str | None:

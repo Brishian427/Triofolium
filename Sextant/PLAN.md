@@ -68,10 +68,10 @@
 62. [done 2026-06-25] Re-run Task 05 tests, static checks, and one E2E iteration proving both TieredBrain tiers fire correctly.
 63. [done 2026-06-25] Commit Architecture 5 robust configuration with the requested commit message.
 64. [done 2026-06-25] Implement D2 9-section validation framework in L5 markdown/JSON and align Brain prompt to the D2 sections before any further deployment work.
-65. [pending 2026-06-25] Fix Sonnet unified diff output/application path, then run 10 D2-formatted self-improving iterations without pausing.
-66. [pending 2026-06-25] Select best candidate only if it meets trade_count, risk discipline, drawdown, and return criteria; otherwise report no-deploy.
-67. [pending 2026-06-25] Strengthen Risk Gate production hard kills including $1000 session cumulative loss from startup equity, then run L6 dry-run readiness.
-68. [pending 2026-06-25] Deploy live only if D2 candidate criteria and Risk Gate hard-kill/readiness checks all pass.
+65. [done 2026-06-25] Fix Sonnet unified diff output/application path, then run 10 D2-formatted self-improving iterations without pausing.
+66. [done 2026-06-25] Select best candidate only if it meets trade_count, risk discipline, drawdown, and return criteria; no candidate qualified, so no-deploy was selected.
+67. [blocked 2026-06-25] Strengthen Risk Gate production hard kills including $1000 session cumulative loss from startup equity, then run L6 dry-run readiness; blocked by A4 no-qualifying-candidate stop condition.
+68. [blocked 2026-06-25] Deploy live only if D2 candidate criteria and Risk Gate hard-kill/readiness checks all pass; blocked because all 10 candidates failed D2 Section 2 Trade Count/Active Intervals.
 
 ## Constraints
 - All project continuity state must live under `D:\Desktop\Nucleus\Triofolium\Sextant`.

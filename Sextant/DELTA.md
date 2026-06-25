@@ -2,6 +2,55 @@
 
 Newest entries first. Insert each new round immediately below this title.
 
+## 2026-06-25 15:25:20 - Phase A Ten D2 Iterations No-Deploy
+
+Time: 2026-06-25 15:25:20
+Title: Phase A Ten D2 Iterations No-Deploy
+Context: After D2 implementation, the principal requested Sonnet patch fixes and 10 D2-formatted self-improving iterations. A4 selection produced zero qualifying candidates, so deployment was stopped by rule.
+
+Sextant Details:
+### PLAN
+#### Steps
+65. [done 2026-06-25] Fix Sonnet unified diff output/application path, then run 10 D2-formatted self-improving iterations without pausing.
+66. [done 2026-06-25] Select best candidate only if it meets trade_count, risk discipline, drawdown, and return criteria; no candidate qualified, so no-deploy was selected.
+67. [blocked 2026-06-25] Strengthen Risk Gate production hard kills including $1000 session cumulative loss from startup equity, then run L6 dry-run readiness; blocked by A4 no-qualifying-candidate stop condition.
+68. [blocked 2026-06-25] Deploy live only if D2 candidate criteria and Risk Gate hard-kill/readiness checks all pass; blocked because all 10 candidates failed D2 Section 2 Trade Count/Active Intervals.
+#### Constraints
+[None]
+#### Risks
+[None]
+
+### STATUS
+#### Metadata
+**Last Updated:** 2026-06-25 15:25:20
+#### Completed
+- 2026-06-25: Fixed Sonnet patch path: prompt now requires raw unified diff, Coder accepts `---/+++` diffs and strips code fences, `git apply` uses `--ignore-whitespace --recount --whitespace=fix`, and sandbox has a manual unified-diff fallback.
+- 2026-06-25: Verified one D2 E2E iteration `5f1e9d24` with Sonnet patch `fallback_used=false`; candidate still failed D2 Section 2 due zero trades.
+- 2026-06-25: Ran 10 sequential D2-formatted loop iterations (`27afbd94`, `6f0d826c`, `0e77f782`, `1c9299d5`, `8c38a0a4`, `90019994`, `c98a858c`, `1087203b`, `72207e1a`, `b2822cd9`); all completed and all were D2 `REJECT`.
+- 2026-06-25: A4 selection found `qualified_count=0`; every candidate had `trade_count=0`, `total_return=0`, `max_drawdown=0`, `risk_discipline=100`, and failed D2 Section 2 Trade Count/Active Intervals gates.
+- 2026-06-25: Stopped before Phase B/C per principal rule: with zero qualifying candidates, do not switch Risk Gate to production and do not live deploy.
+- 2026-06-25: Verified post-Phase-A code with `python -m compileall src scripts tests`, full `pytest tests -q` result `65 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, and test source files contain no `MetaTrader5` literal.
+#### In Progress
+[None]
+#### Not Started
+[None]
+#### Known Issues
+- 2026-06-25: D2 loop explored YAML threshold changes but did not produce trades; future iteration design must include binding StrategyV0 trader/predictor changes, not only config threshold relaxations.
+
+### DECISIONS
+#### [None]
+[None]
+
+### JOURNAL
+#### [None]
+[None]
+
+### GOAL
+#### Completion Criteria
+[None]
+#### Current Focus
+[None]
+
 ## 2026-06-25 15:04:58 - D2 9-Section Evaluation Framework
 
 Time: 2026-06-25 15:04:58

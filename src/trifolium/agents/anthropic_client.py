@@ -50,8 +50,10 @@ class AnthropicClient:
 
         system = (
             "You are a code generation assistant for a quant trading strategy self-improvement loop. "
-            "Generate a unified diff patch implementing the given hypothesis. Modify only the files "
-            "listed in target_files. Output the patch only, no commentary."
+            "Respond with valid unified diff format only. No prose, no markdown code fences, "
+            "no explanation text. Start with --- a/path and +++ b/path lines, or with a valid "
+            "diff --git header followed by --- and +++ lines. Modify only the files listed in "
+            "target_files."
         )
         sections = [f"Hypothesis:\n{hypothesis}\n\nSource files:"]
         for filename, content in relevant_source_files.items():
@@ -65,4 +67,3 @@ class AnthropicClient:
         )
         self.last_call = {"provider": "anthropic", "model": self.model, "real_call": True}
         return "".join(getattr(block, "text", "") for block in response.content).strip()
-

@@ -34,8 +34,9 @@ class Coder:
             relevant[target] = full_path.read_text(encoding="utf-8")
 
         patch_text = self.client.generate_code_patch(hypothesis, relevant)
+        patch_text = self._normalize_patch_text(patch_text)
         self.last_metadata = {"provider": "anthropic", "real_call": True, "fallback_used": False}
-        if not patch_text.startswith("diff --git") and self.allow_fallback:
+        if not self._looks_like_unified_diff(patch_text) and self.allow_fallback:
             patch_text = self._fallback_patch(hypothesis, relevant)
             self.last_metadata["fallback_used"] = True
         self.last_patch = patch_text
@@ -66,6 +67,23 @@ class Coder:
         patch_path = sandbox_dir / ".applied_patch.diff"
         patch_path.write_text(patch_text, encoding="utf-8")
         return True, str(sandbox_dir), None
+
+    @staticmethod
+    def _normalize_patch_text(patch_text: str) -> str:
+        stripped = patch_text.strip()
+        if stripped.startswith("```"):
+            lines = stripped.splitlines()
+            if lines and lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].startswith("```"):
+                lines = lines[:-1]
+            stripped = "\n".join(lines).strip()
+        return stripped
+
+    @staticmethod
+    def _looks_like_unified_diff(patch_text: str) -> bool:
+        stripped = patch_text.lstrip()
+        return stripped.startswith("diff --git") or stripped.startswith("--- ")
 
     @staticmethod
     def _fallback_patch(hypothesis: dict[str, Any], relevant: dict[str, str]) -> str:

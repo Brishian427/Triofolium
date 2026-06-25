@@ -45,6 +45,12 @@ Improvement targeting rules:
 First-iteration hint: if Section 2 fails due zero trades, prefer lowering a
 StrategyV0 confidence, destroyer, or sizing threshold in the YAML config so
 behavior can change in a controlled way.
+
+Current known baseline: StrategyV0 currently makes 0 trades. Section 2 Gate
+Check shows Trade Count = 0 (FAIL). Propose ONE modification per iteration that
+addresses this gate failure. Encourage diverse exploration across iterations:
+threshold relaxation, signal compression, sizing activation, trader branch, or
+predictor gating are all acceptable if they stay inside allowed target files.
 """
 
 NAVIGATOR_SYSTEM_PROMPT = """You are the navigator for Triofolium's self-improving strategy loop.
@@ -233,7 +239,17 @@ class TieredBrain:
             if passed:
                 return True, hypothesis, None
             last_error = error
-            architect_user_content = f"Previous attempt failed validation: {error}\n\nReturn corrected JSON only."
+            architect_user_content = (
+                f"Previous attempt failed validation: {error}\n\n"
+                "Return corrected JSON only with exactly these keys: target_files, element_diff, rationale, expected_metric_change.\n"
+                "Allowed target_files are exactly:\n"
+                "- src/trifolium/strategy/v0/predictor.py\n"
+                "- src/trifolium/strategy/v0/trader.py\n"
+                "- src/trifolium/strategy/v0/portfolio.py\n"
+                "- src/trifolium/strategy/config/strategy_v0.yaml\n"
+                "expected_metric_change must be an object/dict, not a string.\n"
+                "The rationale must cite the D2 section being addressed."
+            )
 
         if self.allow_fallback:
             hypothesis = fallback_zero_trade_hypothesis()
