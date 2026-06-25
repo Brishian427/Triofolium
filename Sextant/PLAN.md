@@ -92,8 +92,8 @@
 86. [done 2026-06-25] Phase J: principal-approved live deployment of `v_fx_only_risk_budgeted_h2_strict` after implementing and verifying all 7 hard-kill protections.
 87. [done 2026-06-25] Copy H2 strict candidate files into live StrategyV0 config scope without touching `src\trifolium\strategy\v0\strategy.py`.
 88. [done 2026-06-25] Switch `config\risk_limits.yaml` to production only after hard-kill verification is implemented and tests pass.
-89. [in_progress 2026-06-25] Commit before live with the principal-approved H2 deploy message, then launch `scripts\live_run_strategy_v0.py`.
-90. [pending 2026-06-25] Verify live runner startup, hard-kill armed status, session baseline equity, and first-order status; if session gate prevents first order, report honestly instead of bypassing it.
+89. [done 2026-06-25] Commit before live with the principal-approved H2 deploy message, then launch `scripts\live_run_strategy_v0.py`.
+90. [in_progress 2026-06-25] Verify live runner startup, hard-kill armed status, session baseline equity, and first-order status; live runner is active, but first order is pending because the H2 strict London-morning session gate is currently closed.
 91. [pending 2026-06-25] Phase K: after J6 live order confirmation only, run sandbox `v_absolute_return` exploration and do not auto-deploy it.
 
 ## Constraints

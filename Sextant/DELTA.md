@@ -2540,6 +2540,19 @@ Delta:
 Next:
 - Implement 7 hard kills and live bar-feed/order routing before switching Risk Gate to production or launching live.
 
+## 2026-06-25 Phase J Live Launch
+
+Time: 2026-06-25
+Title: H2 strict live runner active
+Context: Principal-approved H2 strict deployment proceeded after hard-kill implementation, production Risk Gate switch, tests, static isolation, and pre-live commit.
+
+Delta:
+- Deploy commit created: `c5e3709 deploy: H2 strict to live - 98 trades, RD=100, MaxDD 0.003%, Robust, Return -0.0004% per principal 14:45 approval`.
+- Readiness passed with Risk Gate production, legacy AUDUSD flat, account logging, and all 7 hard kills armed.
+- Live runner launched in background as PID `31996`; primary JSONL log is `logs\live_run_20260625_172215.jsonl`.
+- Session baseline: equity `999988.39`; session-loss hard floor `998988.39`; current positions flat.
+- First live order is not yet confirmed because the H2 strict London-morning session gate is currently closed; Phase K remains blocked until J6 first live trade confirmation.
+
 ### GOAL
 #### Completion Criteria
 - [x] Initialize `Sextant` continuity files under the workspace root.
