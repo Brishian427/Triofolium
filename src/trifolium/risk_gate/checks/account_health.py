@@ -21,6 +21,10 @@ def check_account_health(
     if snapshot.margin_level_pct is None:
         return False, "check_account_health: margin_level_pct is unavailable"
     floor = limits.hard_floors.min_margin_level_pct
+    if snapshot.margin_level_pct == 0 and snapshot.open_positions_count == 0:
+        if snapshot.equity <= Decimal("0"):
+            return False, f"check_account_health: equity {snapshot.equity} is non-positive"
+        return True, None
     if snapshot.margin_level_pct < floor:
         return False, f"check_account_health: margin level {snapshot.margin_level_pct}% below floor {floor}%"
     if snapshot.equity <= Decimal("0"):

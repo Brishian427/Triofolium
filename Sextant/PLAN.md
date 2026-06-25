@@ -97,6 +97,7 @@
 91. [pending 2026-06-25] Phase K: after J6 live order confirmation only, run sandbox `v_absolute_return` exploration and do not auto-deploy it.
 92. [blocked 2026-06-25] J-prime: principal override relaxed H2 session gate and live runner was restarted with original baseline, but first-trade verification remains blocked because portfolio concentration budgeting zeroed current two-symbol targets before Risk Gate submission.
 93. [in_progress 2026-06-25] J-triple-prime: principal verdict disables the StrategyV0 single-symbol concentration gate, preserves Risk Gate hard kills and original session baseline, then restarts live runner for first-order verification.
+94. [in_progress 2026-06-25] J-triple-prime follow-up: align Risk Gate account-health semantics with MT5 flat-account `margin_level=0.0`, then restart live runner again with the original session baseline.
 
 ## Constraints
 - All project continuity state must live under `D:\Desktop\Nucleus\Triofolium\Sextant`.

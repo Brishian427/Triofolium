@@ -215,3 +215,11 @@
 **Decision:** Disable the StrategyV0 single-symbol concentration gate for live H2 strict by setting it to the disabled threshold, while keeping cost gate, session gate, FX-only universe, per-symbol XAGUSD cap, per-symbol notional cap, and all Risk Gate hard kills.
 **Rationale:** The principal judged the 35% concentration rule as an attribution-derived optimization that suppressed legitimate conviction trades, not a 14:45 explicit safety requirement. Live safety remains enforced by the 7 hard kills and the $1000 session-loss floor.
 **Consequences:** J-triple-prime can verify first live order naturally at the next bar close. The live runner must restart with the original `999988.39` session baseline so the loss floor remains `998988.39`.
+
+## 2026-06-25 Treat Flat MT5 Margin Level Zero as Healthy
+
+**Context:** MT5 reports `margin_level=0.0` when the account has no open positions. Risk Gate `check_account_health` interpreted this as below the `200%` floor and rejected the first opening order, despite hard-kill and observability already treating flat-account margin zero as non-actionable.
+**Options:** Leave Risk Gate stricter and block first order; fake a high margin level in the live runner; make `check_account_health` understand flat-account MT5 margin semantics.
+**Decision:** In `check_account_health`, treat `margin_level_pct == 0` with `open_positions_count == 0` as healthy if equity is positive.
+**Rationale:** The hard margin floor protects accounts with active margin exposure. A flat account with no margin used cannot breach margin level in the same sense, and projected exposure is separately checked by Risk Gate leverage and lot caps.
+**Consequences:** First opening orders can proceed to later checks and MT5 execution, while low-margin accounts with open positions still fail closed.
