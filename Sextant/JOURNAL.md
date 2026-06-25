@@ -1,5 +1,48 @@
 # Work Log
 
+## [2026-06-25 15:49:57] Session 21
+
+**Goal:** Continue from Phase A4 no-deploy stop, diagnose StrategyV0 zero-trade behavior, apply one targeted diagnostic fix, and expose strategy metrics in the UI.
+**Actually Completed:** Added verbose StrategyV0 diagnostics, generated default and warmup diagnostic reports, implemented warmup-aware StrategyV0 validation, attempted sandbox `v_diagnostic_fix` with `destroyer_validation_sharpe_threshold=-1.0`, confirmed the candidate still produced 0 trades and must not deploy, and added backtest/live metrics panels to the demo UI.
+**Files Created:**
+- `D:\Desktop\Nucleus\Triofolium\scripts\diagnose_strategy_v0.py`
+**Files Modified:**
+- `D:\Desktop\Nucleus\Triofolium\scripts\demo_ui.py`
+- `D:\Desktop\Nucleus\Triofolium\src\trifolium\backtest\bar_engine.py`
+- `D:\Desktop\Nucleus\Triofolium\src\trifolium\loop\orchestrator.py`
+- `D:\Desktop\Nucleus\Triofolium\src\trifolium\validation\__init__.py`
+- `D:\Desktop\Nucleus\Triofolium\src\trifolium\validation\l5.py`
+- `D:\Desktop\Nucleus\Triofolium\tests\test_backtest\test_bar_engine.py`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\STATUS.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\GOAL.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\PLAN.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\DECISIONS.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\JOURNAL.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\DELTA.md`
+**Project File Structure After Session:**
+```text
+D:\Desktop\Nucleus\Triofolium\
+|-- scripts\
+|   |-- demo_ui.py
+|   `-- diagnose_strategy_v0.py
+|-- src\trifolium\
+|   |-- backtest\bar_engine.py
+|   |-- loop\orchestrator.py
+|   `-- validation\
+|       |-- __init__.py
+|       `-- l5.py
+|-- tests\test_backtest\test_bar_engine.py
+`-- Sextant\
+    |-- STATUS.md
+    |-- GOAL.md
+    |-- PLAN.md
+    |-- DECISIONS.md
+    |-- JOURNAL.md
+    `-- DELTA.md
+```
+**Issues Encountered:** The zero-trade state is serial: the original six-hour loop had no fitting warmup; after warmup, all symbols were destroyer-neutralized; after lowering the destroyer threshold in sandbox, signals remained below the first non-zero sizing tier.
+**Next Session Starting Point:** Decide whether to run a new candidate that targets sizing thresholds, and separately upgrade `scripts\live_run_strategy_v0.py` from readiness heartbeat to a real live bar-feed/order loop before any deployment.
+
 ## [2026-06-24 21:40:57] Session 20
 
 **Goal:** Complete Task 02 Risk Gate L3 observability and dry-run, then stop for principal review.
@@ -999,3 +1042,42 @@ D:\Desktop\Nucleus\Triofolium\
 ```
 **Issues Encountered:** NeMo install failed because `annoy` needs Microsoft C++ Build Tools; Pydantic fallback is active. Final NIM Ultra call timed out and used fallback hypothesis; Anthropic call occurred but its patch formatting was normalized by deterministic fallback.
 **Next Session Starting Point:** Review `logs\loop_iterations_30021ae2.jsonl`, optionally run another iteration if a raw NIM-success log is required, or start the demo UI with `scripts\demo_ui.py`.
+
+## [2026-06-25 16:39:43] Session 22
+
+**Goal:** Tune a sandbox StrategyV0 version that can pass backtest first, while explicitly not going live.
+**Actually Completed:** Tuned multiple sandbox candidates after the zero-trade diagnosis, added optional StrategyV0 trader controls for selected-signal floors, disabled symbols, per-symbol lot caps, and signal inversion, aligned backtest concentration risk with Risk Gate notional exposure, and selected `sandboxes\v_backtest_pass_candidate_i` as the first candidate passing the 6-hour D2 hard gates. Candidate I passed with `trade_count=37`, `active_intervals=14`, `Risk Discipline=100`, and `MaxDD=0.301949%`; no live deployment or production-mode switch was performed.
+**Files Created:**
+- [None; sandbox outputs are ignored by git]
+**Files Modified:**
+- `D:\Desktop\Nucleus\Triofolium\src\trifolium\strategy\v0\config.py`
+- `D:\Desktop\Nucleus\Triofolium\src\trifolium\strategy\v0\trader.py`
+- `D:\Desktop\Nucleus\Triofolium\src\trifolium\backtest\equity_tracker.py`
+- `D:\Desktop\Nucleus\Triofolium\tests\test_strategy\test_strategy_v0.py`
+- `D:\Desktop\Nucleus\Triofolium\tests\test_backtest\test_equity_tracker.py`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\STATUS.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\GOAL.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\PLAN.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\DECISIONS.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\JOURNAL.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\DELTA.md`
+**Issues Encountered:** Candidate I is a gate-pass artifact, not live-ready alpha: its 6-hour return is negative, D2 decision is `KEEP v_N-1`, and the 24-hour sanity check fails Risk Discipline with score `90`.
+**Next Session Starting Point:** Improve candidate I's return and robustness, especially 24-hour Risk Discipline, before any live-readiness or deployment work resumes.
+
+## [2026-06-25 17:07:00] Session 23
+
+**Goal:** Execute Phase G conviction-based redesign, run long-window validation, classify the result, and commit pending work.
+**Actually Completed:** Added reproducible Phase G script, created `v_conviction_redesign` from v0 baseline without forced participation, ran maximum-available-window D2 validation, classified the result as `d`, stopped before G3/live deployment, fixed `ValidationResult.passed` semantics, and verified compile/tests/static MT5 isolation.
+**Files Created:**
+- `D:\Desktop\Nucleus\Triofolium\scripts\phase_g_conviction_validation.py`
+- `D:\Desktop\Nucleus\Triofolium\tests\test_strategy\test_phase_g_conviction.py`
+**Files Modified:**
+- `D:\Desktop\Nucleus\Triofolium\src\trifolium\validation\l5.py`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\STATUS.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\GOAL.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\PLAN.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\DECISIONS.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\JOURNAL.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\DELTA.md`
+**Issues Encountered:** `v_conviction_redesign` is binding and active but not deployable: 810 trades, Total Return `-0.769944%`, Risk Discipline `90`, and Robustness `UNSTABLE`.
+**Next Session Starting Point:** Treat StrategyV0 v0-family as failing current IMC deployment principles until an architecture/concentration redesign is specified and validated.

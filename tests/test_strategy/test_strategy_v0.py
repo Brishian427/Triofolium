@@ -2,10 +2,10 @@ from datetime import datetime, timezone
 from decimal import Decimal
 
 from trifolium.backtest.types import AccountState, Bar, Tick
-from trifolium.strategy.v0.config import load_strategy_v0_config
+from trifolium.strategy.v0.config import SizingRow, load_strategy_v0_config
 from trifolium.strategy.v0.portfolio import apply_portfolio_scaling, check_gross_leverage
 from trifolium.strategy.v0.strategy import StrategyV0
-from trifolium.strategy.v0.trader import compute_signal, cross_sectional_filter, exposure_to_lot, signal_to_exposure
+from trifolium.strategy.v0.trader import StrategyV0Trader, compute_signal, cross_sectional_filter, exposure_to_lot, signal_to_exposure
 
 
 def test_strategy_v0_config_loads() -> None:
@@ -46,6 +46,86 @@ def test_exposure_to_lot_uses_configured_contract_sizes() -> None:
     assert lot > 0
     xag_lot = exposure_to_lot("XAGUSD", Decimal("0.01"), Decimal("1000000"), Decimal("30"), settings)
     assert xag_lot > 0
+
+
+def test_selected_signal_floor_sizes_weak_cross_sectional_picks() -> None:
+    settings = load_strategy_v0_config()
+    tuned_trader = settings.trader.model_copy(
+        update={
+            "selected_signal_floor": Decimal("0.000001"),
+            "top_n": 1,
+            "bottom_n": 1,
+            "sizing_table": [
+                SizingRow(abs_signal_max=Decimal("0.000001"), exposure_pct=Decimal("0.0")),
+                SizingRow(abs_signal_max=Decimal("1.01"), exposure_pct=Decimal("0.25")),
+            ],
+        }
+    )
+    tuned = settings.model_copy(update={"trader": tuned_trader})
+    trader = StrategyV0Trader(tuned)
+    predictions = {symbol: (0.0, 1.0) for symbol in settings.tradable_symbols}
+    predictions["EURUSD"] = (1e-12, 1.0)
+    predictions["AUDUSD"] = (-1e-12, 1.0)
+    prices = {symbol: Decimal("1") for symbol in settings.tradable_symbols}
+    prices["XAUUSD"] = Decimal("2300")
+    prices["XAGUSD"] = Decimal("30")
+
+    targets, _signals = trader.target_lots(predictions, Decimal("1000000"), prices)
+
+    assert targets["EURUSD"] > 0
+    assert targets["AUDUSD"] < 0
+
+
+def test_disabled_symbols_are_forced_flat_by_trader() -> None:
+    settings = load_strategy_v0_config()
+    tuned_trader = settings.trader.model_copy(update={"disabled_symbols": ["XAGUSD"]})
+    tuned = settings.model_copy(update={"trader": tuned_trader})
+    trader = StrategyV0Trader(tuned)
+    predictions = {symbol: (0.0, 1.0) for symbol in settings.tradable_symbols}
+    predictions["XAGUSD"] = (-1.0, 0.1)
+    predictions["EURUSD"] = (1.0, 0.1)
+    prices = {symbol: Decimal("1") for symbol in settings.tradable_symbols}
+    prices["XAUUSD"] = Decimal("2300")
+    prices["XAGUSD"] = Decimal("30")
+
+    targets, _signals = trader.target_lots(predictions, Decimal("1000000"), prices)
+
+    assert targets["XAGUSD"] == 0
+
+
+def test_max_lots_by_symbol_caps_target_size() -> None:
+    settings = load_strategy_v0_config()
+    tuned_trader = settings.trader.model_copy(update={"max_lots_by_symbol": {"XAGUSD": Decimal("0.01")}})
+    tuned = settings.model_copy(update={"trader": tuned_trader})
+    trader = StrategyV0Trader(tuned)
+    predictions = {symbol: (0.0, 1.0) for symbol in settings.tradable_symbols}
+    predictions["XAGUSD"] = (-1.0, 0.1)
+    predictions["EURUSD"] = (1.0, 0.1)
+    prices = {symbol: Decimal("1") for symbol in settings.tradable_symbols}
+    prices["XAUUSD"] = Decimal("2300")
+    prices["XAGUSD"] = Decimal("30")
+
+    targets, _signals = trader.target_lots(predictions, Decimal("1000000"), prices)
+
+    assert abs(targets["XAGUSD"]) == Decimal("0.01")
+
+
+def test_invert_signals_flips_cross_sectional_direction() -> None:
+    settings = load_strategy_v0_config()
+    tuned_trader = settings.trader.model_copy(update={"invert_signals": True, "top_n": 1, "bottom_n": 1})
+    tuned = settings.model_copy(update={"trader": tuned_trader})
+    trader = StrategyV0Trader(tuned)
+    predictions = {symbol: (0.0, 1.0) for symbol in settings.tradable_symbols}
+    predictions["EURUSD"] = (1.0, 0.1)
+    predictions["AUDUSD"] = (-1.0, 0.1)
+    prices = {symbol: Decimal("1") for symbol in settings.tradable_symbols}
+    prices["XAUUSD"] = Decimal("2300")
+    prices["XAGUSD"] = Decimal("30")
+
+    targets, _signals = trader.target_lots(predictions, Decimal("1000000"), prices)
+
+    assert targets["EURUSD"] < 0
+    assert targets["AUDUSD"] > 0
 
 
 def test_portfolio_scaling_reduces_gross_leverage() -> None:

@@ -4,8 +4,9 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 import pandas as pd
+from pydantic import PrivateAttr
 
-from trifolium.backtest.bar_engine import bar_backtest
+from trifolium.backtest.bar_engine import bar_backtest, bar_backtest_from_bars
 from trifolium.backtest.types import AccountState, Bar, Order, Tick
 from trifolium.strategy.base import Strategy
 
@@ -22,6 +23,34 @@ class BarOnlyNoopStrategy(Strategy):
 
     def on_bar_close(self, bar: Bar, state: AccountState) -> list[Order]:
         return []
+
+
+class WarmupAwareStrategy(Strategy):
+    name: str = "warmup_aware"
+    symbols: list[str] = ["AUDUSD"]
+
+    _warmup_symbols: list[str] = PrivateAttr(default_factory=list)
+    _recalibrations: int = PrivateAttr(default=0)
+
+    def should_call_on_tick(self, tick: Tick) -> bool:
+        return False
+
+    def should_call_on_bar_close(self, bar: Bar) -> bool:
+        return True
+
+    def _append_bar(self, bar: Bar) -> None:
+        self._warmup_symbols.append(bar.symbol)
+
+    def recalibrate_from_bars(self, bars):
+        self._recalibrations += 1
+
+    @property
+    def warmup_symbols(self) -> list[str]:
+        return list(self._warmup_symbols)
+
+    @property
+    def recalibrations(self) -> int:
+        return self._recalibrations
 
 
 def _write_ticks(path, symbol: str) -> None:
@@ -63,3 +92,50 @@ def test_bar_backtest_aggregates_small_parquet_fixture(tmp_path):
     assert result.trade_count == 0
     assert result.final_equity == Decimal("1000000")
     assert result.data_quality.processed_ticks == 40
+
+
+def test_bar_backtest_from_bars_can_prefit_from_warmup_bars():
+    start = datetime(2026, 5, 11, 1, 0, tzinfo=timezone.utc)
+    warmup = start - timedelta(minutes=15)
+    strategy = WarmupAwareStrategy()
+    bars = [
+        Bar(
+            timestamp=warmup,
+            symbol="AUDUSD",
+            open=Decimal("1.0"),
+            high=Decimal("1.0"),
+            low=Decimal("1.0"),
+            close=Decimal("1.0"),
+            bid=Decimal("0.9999"),
+            ask=Decimal("1.0001"),
+            volume=Decimal("1"),
+            spread_pips=Decimal("0"),
+        ),
+        Bar(
+            timestamp=start,
+            symbol="AUDUSD",
+            open=Decimal("1.0"),
+            high=Decimal("1.0"),
+            low=Decimal("1.0"),
+            close=Decimal("1.0"),
+            bid=Decimal("0.9999"),
+            ask=Decimal("1.0001"),
+            volume=Decimal("1"),
+            spread_pips=Decimal("0"),
+        ),
+    ]
+
+    result = bar_backtest_from_bars(
+        strategy,
+        ["AUDUSD"],
+        start,
+        start + timedelta(minutes=15),
+        Decimal("1000000"),
+        bars_by_symbol={"AUDUSD": bars},
+        warmup_start=warmup,
+        warmup_recalibrate_at_start=True,
+    )
+
+    assert result.trade_count == 0
+    assert strategy.warmup_symbols == ["AUDUSD"]
+    assert strategy.recalibrations == 1

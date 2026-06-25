@@ -2,6 +2,195 @@
 
 Newest entries first. Insert each new round immediately below this title.
 
+## 2026-06-25 17:07:00 - Phase G Conviction Redesign No-Deploy
+
+Time: 2026-06-25 17:07:00
+Title: Phase G Conviction Redesign No-Deploy
+Context: The principal requested Phase G: rebuild from v0 baseline without forced participation, run maximum-window validation, classify a/b/c/d, and commit pending work.
+
+Sextant Details:
+### PLAN
+#### Steps
+76. [done 2026-06-25] Create `v_conviction_redesign` from v0 baseline, preserving only destroyer-threshold, shorter-lookback, notional-concentration, and XAGUSD cap changes while dropping forced participation.
+77. [done 2026-06-25] Run D2 validation over the 30-day or maximum available historical window and classify the outcome as `d`.
+78. [done 2026-06-25] Classification was not (a), so stop without live deployment and report the StrategyV0 architecture finding honestly.
+79. [blocked 2026-06-25] Secondary 24-hour validation was not run because Phase G outcome was `d`, not (a).
+80. [done 2026-06-25] Verify compile/tests/static MT5 isolation, update Sextant, and commit pending Phase D/E/G/D2/UI work with result-coded commit message.
+#### Constraints
+- Phase G may only proceed toward live if the long-window candidate satisfies outcome (a) and the secondary 24-hour validation keeps Risk Discipline at 100; otherwise stop before production mode.
+#### Risks
+- 2026-06-25: Conviction-based redesign may reveal that StrategyV0 has consistent negative expectancy or insufficient trade density over the full available history; treat that as a valid finding rather than forcing another threshold hack.
+
+### STATUS
+#### Metadata
+**Last Updated:** 2026-06-25 17:07:00
+#### Completed
+- 2026-06-25: Created reproducible Phase G script `scripts\phase_g_conviction_validation.py` and sandbox candidate `sandboxes\v_conviction_redesign` from v0 baseline without `selected_signal_floor`.
+- 2026-06-25: Ran maximum-available-window D2 validation for `v_conviction_redesign` from `2026-05-11T00:00:00Z` to `2026-06-10T23:59:59Z`; classification `d`, D2 decision `REJECT`, report `sandboxes\v_conviction_redesign\reports\validation_strategy_v0_20260625_155756\validation_report.md`.
+- 2026-06-25: Phase G metrics: `trade_count=810`, `active_intervals=355`, Total Return `-0.769944%`, MaxDD `0.835379%`, Risk Discipline `90`, Win Rate `38.78%`, Robustness `UNSTABLE`.
+- 2026-06-25: Stopped before G3 secondary validation and live deployment because Phase G classified as `d`; `config\risk_limits.yaml` remains `mode: calibration` and no MT5 live order was sent.
+- 2026-06-25: Fixed D2 machine-readable acceptance semantics so `ValidationResult.passed` is true only when D2 decision is `ACCEPT v_N`, not merely when hard gates pass.
+- 2026-06-25: Verified Phase G with `python -m compileall src scripts tests`, full `pytest tests -q` result `72 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, test source files contain no `MetaTrader5` literal, and Risk Gate mode remains calibration.
+#### In Progress
+- 2026-06-25: L6 runtime readiness remains blocked because Phase G produced a no-deploy classification `d`, `config\risk_limits.yaml` remains `mode: calibration`, and no live bar-feed/order loop has been implemented.
+#### Not Started
+[None]
+#### Known Issues
+- 2026-06-25: `v_conviction_redesign` is binding but not deployable: long-window validation trades actively yet loses money, violates Risk Discipline due concentration penalty, and fails robustness with all six perturbation rows failing Filter 2.
+
+### DECISIONS
+#### 2026-06-25 Phase G Conviction-Based Redesign From v0 Baseline
+**Context:** Candidate `v_backtest_pass_candidate_i` passed 6-hour hard gates but failed robustness and 24-hour Risk Discipline; `selected_signal_floor` is suspected of forcing dense low-conviction participation.
+**Options:** Continue tuning from candidate I; start from v0 and keep only structural fixes; force more participation until metrics improve.
+**Decision:** Create `v_conviction_redesign` from v0 baseline, preserve only the predictor-fit and risk-accounting fixes, remove forced participation, and use lowered but still discretized conviction thresholds.
+**Rationale:** This tests whether StrategyV0's signal has genuine edge when sizing remains conviction-graded instead of participation-forced.
+**Consequences:** Outcomes (b), (c), and (d) are valid no-deploy findings. Live deployment remains blocked unless the 30-day validation meets outcome (a) and the secondary 24-hour validation also preserves Risk Discipline 100.
+
+#### 2026-06-25 No-Deploy After Phase G Classification d
+**Context:** `v_conviction_redesign` traded actively over the maximum available window but produced negative return, Risk Discipline `90`, and Robustness `UNSTABLE`.
+**Options:** Deploy despite D2 hard-gate failure; continue threshold hacking; stop and record the architecture finding.
+**Decision:** Stop before G3, do not run live deployment, and classify the result as Phase G outcome `d`.
+**Rationale:** D2 Section 2 Risk Discipline failed and D2 Section 6 Robustness failed; no secondary metric can override a hard-gate or robustness violation.
+**Consequences:** Risk Gate remains in calibration mode. The next valid work is architectural redesign or concentration-control redesign, not live launch.
+
+### JOURNAL
+#### [2026-06-25 17:07:00] Session 23
+**Goal:** Execute Phase G conviction-based redesign, run long-window validation, classify the result, and commit pending work.
+**Actually Completed:** Added reproducible Phase G script, created `v_conviction_redesign` from v0 baseline without forced participation, ran maximum-available-window D2 validation, classified the result as `d`, stopped before G3/live deployment, fixed `ValidationResult.passed` semantics, and verified compile/tests/static MT5 isolation.
+**Files Created:**
+- `D:\Desktop\Nucleus\Triofolium\scripts\phase_g_conviction_validation.py`
+- `D:\Desktop\Nucleus\Triofolium\tests\test_strategy\test_phase_g_conviction.py`
+**Files Modified:**
+- `D:\Desktop\Nucleus\Triofolium\src\trifolium\validation\l5.py`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\STATUS.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\GOAL.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\PLAN.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\DECISIONS.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\JOURNAL.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\DELTA.md`
+**Issues Encountered:** `v_conviction_redesign` is binding and active but not deployable: 810 trades, Total Return `-0.769944%`, Risk Discipline `90`, and Robustness `UNSTABLE`.
+**Next Session Starting Point:** Treat StrategyV0 v0-family as failing current IMC deployment principles until an architecture/concentration redesign is specified and validated.
+
+### GOAL
+#### Completion Criteria
+[None]
+#### Current Focus
+Phase G long-window validation found StrategyV0 conviction redesign is binding but not deployable; next focus is an architectural rethink or concentration-control redesign before any live-readiness work.
+
+## 2026-06-25 16:39:43 - Sandbox Backtest-Gate-Pass Candidate
+
+Time: 2026-06-25 16:39:43
+Title: Sandbox Backtest-Gate-Pass Candidate
+Context: The principal requested Chinese communication and asked for a strategy version that can pass backtest first, explicitly with no live deployment.
+
+Sextant Details:
+### PLAN
+#### Steps
+73. [done 2026-06-25] Tune a new sandbox StrategyV0 candidate that addresses the known zero-trade chain: validation warmup, destroyer neutralization, and low-signal sizing thresholds.
+74. [done 2026-06-25] Run D2 6-hour backtests for candidate variants and select `sandboxes\v_backtest_pass_candidate_i` as the first version that passes D2 hard gates without live deployment.
+75. [done 2026-06-25] Stop before live deployment; Risk Gate stayed in calibration mode and no MT5 live orders were sent in this tuning round.
+
+### STATUS
+#### Metadata
+**Last Updated:** 2026-06-25 16:39:43
+#### Completed
+- 2026-06-25: Tuned multiple sandbox StrategyV0 candidates after the zero-trade diagnosis; selected `sandboxes\v_backtest_pass_candidate_i` as the first D2 6-hour gate-pass candidate.
+- 2026-06-25: Candidate `v_backtest_pass_candidate_i` passed 6-hour D2 hard gates with `trade_count=37`, `active_intervals=14`, `Risk Discipline=100`, `MaxDD=0.301949%`, and report `sandboxes\v_backtest_pass_candidate_i\reports\validation_strategy_v0_20260625_153911\validation_report.md`.
+- 2026-06-25: Added optional StrategyV0 trader controls `selected_signal_floor`, `disabled_symbols`, `max_lots_by_symbol`, and `invert_signals`; default config behavior remains unchanged unless a sandbox config enables them.
+- 2026-06-25: Aligned backtest concentration risk accounting with Risk Gate by changing `EquityTracker` concentration from raw units to notional exposure.
+- 2026-06-25: Verified tuning work with `python -m compileall src scripts tests`, full `pytest tests -q` result `71 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, and test source files contain no `MetaTrader5` literal.
+#### In Progress
+- 2026-06-25: L6 runtime readiness remains blocked because the selected candidate is only a 6-hour D2 gate-pass sandbox version, `config\risk_limits.yaml` remains `mode: calibration`, and no live bar-feed/order loop has been implemented.
+#### Known Issues
+- 2026-06-25: `v_backtest_pass_candidate_i` is not live-ready alpha: its 6-hour gate pass has slightly negative return and D2 decision `KEEP v_N-1`, and its 24-hour sanity check fails Risk Discipline with score `90`.
+
+### DECISIONS
+#### 2026-06-25 Select v_backtest_pass_candidate_i As First Backtest-Gate-Pass Candidate
+**Context:** The latest principal request was to tune a strategy version that can pass backtest first and explicitly not go live.
+**Decision:** Select `sandboxes\v_backtest_pass_candidate_i` as the first sandbox candidate that passes D2 6-hour hard gates, but only as a backtest-gate-pass artifact.
+**Rationale:** Candidate I produced 37 trades, 14 active intervals, Risk Discipline 100, and MaxDD 0.301949% in the 6-hour D2 backtest while preserving the no-live constraint.
+**Consequences:** Candidate I is not promoted to live: its 6-hour return is negative, D2 decision is `KEEP v_N-1`, and the 24-hour sanity check fails Risk Discipline with score 90.
+
+### JOURNAL
+#### [2026-06-25 16:39:43] Session 22
+**Goal:** Tune a sandbox StrategyV0 version that can pass backtest first, while explicitly not going live.
+**Actually Completed:** Tuned multiple sandbox candidates, selected `v_backtest_pass_candidate_i` as the first 6-hour D2 gate-pass version, updated StrategyV0 optional controls and notional concentration accounting, verified `71 passed`, and stopped before live.
+**Issues Encountered:** Candidate I passes hard gates but is still negative-return and not robust across 24 hours.
+**Next Session Starting Point:** Improve candidate I's return and robustness before any live-readiness or deployment work resumes.
+
+## 2026-06-25 15:49:57 - StrategyV0 Diagnostic Fix No-Deploy
+
+Time: 2026-06-25 15:49:57
+Title: StrategyV0 Diagnostic Fix No-Deploy
+Context: The principal requested Phase D/E/F after the 10-iteration no-deploy stop. Diagnostics found serial zero-trade blockers, the sandbox diagnostic fix still failed D2 trade gates, and deployment was stopped while UI metrics were added.
+
+Sextant Details:
+### PLAN
+#### Steps
+69. [done 2026-06-25] Diagnose StrategyV0 zero-trade root cause with 6-hour verbose internal-state backtests and write JSONL plus markdown diagnostic logs.
+70. [done 2026-06-25] Implement targeted warmup-aware validation plus sandbox `v_diagnostic_fix` destroyer-threshold change, then run a 6-hour D2 backtest.
+71. [blocked 2026-06-25] Deploy `v_diagnostic_fix` only if it produces more than 5 trades, keeps Risk Discipline at 100, and keeps MaxDD below 3%; blocked because the candidate still produced 0 trades.
+72. [done 2026-06-25] Add strategy-specific metrics visibility to the demo UI so backtest metrics and live metrics are visible to the principal.
+#### Constraints
+- Do not proceed to Risk Gate production mode or live launch while the latest diagnostic candidate remains D2 `REJECT`.
+#### Risks
+- 2026-06-25: StrategyV0 diagnostics revealed serial zero-trade blockers; stacking additional strategy fixes after `v_diagnostic_fix` would exceed the current one-fix Phase E scope.
+
+### STATUS
+#### Metadata
+**Last Updated:** 2026-06-25 15:49:57
+#### Completed
+- 2026-06-25: Built `scripts\diagnose_strategy_v0.py` and generated default 6-hour diagnostic `logs\diagnostic_v0_20260625_145247.md`; root cause for the original loop window is predictor not fitting because the window has at most 24 aligned bars while StrategyV0 needs about 144 bars after lookback/sample/buffer.
+- 2026-06-25: Added warmup-aware bar validation support in `bar_engine`, `validation.l5`, and the loop orchestrator so six-hour StrategyV0 candidate validation can prefit from pre-window bars.
+- 2026-06-25: Warmup diagnostic `logs\diagnostic_v0_20260625_144341.md` showed the next blocker: all symbols were destroyer-neutralized after initial recalibration.
+- 2026-06-25: Created sandbox candidate `sandboxes\v_diagnostic_fix` with `destroyer_validation_sharpe_threshold` changed from `0.0` to `-1.0`; D2 backtest `sandboxes\v_diagnostic_fix\reports\validation_strategy_v0_20260625_144535` still produced `trade_count=0`, `MaxDD=0`, `Risk Discipline=100`, and D2 `REJECT`.
+- 2026-06-25: Final sandbox diagnostic `logs\diagnostic_v0_20260625_144601.md` showed signals were computed but stayed below the first non-zero sizing tier; no orders were emitted.
+- 2026-06-25: Updated `scripts\demo_ui.py` to show strategy-specific backtest metrics, D2 gates, live account metrics, live strategy telemetry, and latest Risk Gate status; verified the UI at `http://127.0.0.1:8001` with HTTP 200.
+- 2026-06-25: Verified diagnostic/UI work with `python -m compileall src scripts tests`, full `pytest tests -q` result `66 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, and test source files contain no `MetaTrader5` literal.
+#### In Progress
+- 2026-06-25: L6 runtime readiness is blocked because `v_diagnostic_fix` failed Phase E, `config\risk_limits.yaml` remains `mode: calibration`, and live StrategyV0 should not start without a qualifying candidate.
+#### Not Started
+[None]
+#### Known Issues
+- 2026-06-25: StrategyV0 zero-trade state is now a serial blocker: original six-hour smoke lacked warmup, warmup then exposed all-destroyer neutralization, and the `-1.0` destroyer-threshold sandbox fix exposed signals below sizing thresholds.
+- 2026-06-25: `scripts\live_run_strategy_v0.py` remains a readiness/heartbeat harness and does not yet aggregate live bars or submit StrategyV0-generated orders; future live deployment requires a real bar-feed/order loop in addition to Risk Gate hard kills.
+
+### DECISIONS
+#### 2026-06-25 Stop Live Deployment After Diagnostic Fix Failed Phase E
+**Context:** The principal approved conditional live deployment after a diagnostic fix, but Phase E required `v_diagnostic_fix` to produce more than 5 trades, keep Risk Discipline at 100, and keep MaxDD below 3%.
+**Options:** Deploy despite the failed diagnostic fix; stack additional strategy changes until trades appear; stop and report the serial zero-trade blockers.
+**Decision:** Stop before production mode and live deployment because `v_diagnostic_fix` still produced 0 trades and D2 `REJECT`.
+**Rationale:** The explicit Phase E deployment gate was not met, and stacking more fixes would exceed the requested one-fix diagnostic scope.
+**Consequences:** Risk Gate remains in calibration mode. The next candidate should target the sizing-threshold blocker, and live deployment also needs a real bar-feed/order loop because the current live runner is still a readiness/heartbeat harness.
+
+### JOURNAL
+#### [2026-06-25 15:49:57] Session 21
+**Goal:** Continue from Phase A4 no-deploy stop, diagnose StrategyV0 zero-trade behavior, apply one targeted diagnostic fix, and expose strategy metrics in the UI.
+**Actually Completed:** Added verbose StrategyV0 diagnostics, generated default and warmup diagnostic reports, implemented warmup-aware StrategyV0 validation, attempted sandbox `v_diagnostic_fix` with `destroyer_validation_sharpe_threshold=-1.0`, confirmed the candidate still produced 0 trades and must not deploy, and added backtest/live metrics panels to the demo UI.
+**Files Created:**
+- `D:\Desktop\Nucleus\Triofolium\scripts\diagnose_strategy_v0.py`
+**Files Modified:**
+- `D:\Desktop\Nucleus\Triofolium\scripts\demo_ui.py`
+- `D:\Desktop\Nucleus\Triofolium\src\trifolium\backtest\bar_engine.py`
+- `D:\Desktop\Nucleus\Triofolium\src\trifolium\loop\orchestrator.py`
+- `D:\Desktop\Nucleus\Triofolium\src\trifolium\validation\__init__.py`
+- `D:\Desktop\Nucleus\Triofolium\src\trifolium\validation\l5.py`
+- `D:\Desktop\Nucleus\Triofolium\tests\test_backtest\test_bar_engine.py`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\STATUS.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\GOAL.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\PLAN.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\DECISIONS.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\JOURNAL.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\DELTA.md`
+**Issues Encountered:** The zero-trade state is serial: the original six-hour loop had no fitting warmup; after warmup, all symbols were destroyer-neutralized; after lowering the destroyer threshold in sandbox, signals remained below the first non-zero sizing tier.
+**Next Session Starting Point:** Decide whether to run a new candidate that targets sizing thresholds, and separately upgrade `scripts\live_run_strategy_v0.py` from readiness heartbeat to a real live bar-feed/order loop before any deployment.
+
+### GOAL
+#### Completion Criteria
+[None]
+#### Current Focus
+Phase D/E diagnostics are complete; live deployment is stopped until a candidate clears D2 trade-count gates and the live runner is upgraded from heartbeat harness to real bar-feed/order execution.
+
 ## 2026-06-25 15:25:20 - Phase A Ten D2 Iterations No-Deploy
 
 Time: 2026-06-25 15:25:20

@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from trifolium.backtest.bar_engine import bar_backtest_from_bars, load_symbol_bars
 from trifolium.backtest.config import load_backtest_config
 from trifolium.backtest.types import BacktestResult, Bar
-from trifolium.strategy.v0.config import load_strategy_v0_config
+from trifolium.strategy.v0.config import StrategyV0Config, load_strategy_v0_config
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -51,6 +51,26 @@ def _resolve_symbols(symbols: str | list[str]) -> list[str]:
     if symbols == "all_tradable":
         return load_strategy_v0_config().tradable_symbols
     return [item.strip() for item in symbols.split(",") if item.strip()]
+
+
+def strategy_v0_warmup_duration(strategy_config_path: Path | None = None) -> timedelta:
+    """Return the minimum StrategyV0 pre-window warmup needed for fitting."""
+
+    settings = load_strategy_v0_config(strategy_config_path)
+    max_lookback = _strategy_v0_max_lookback(settings)
+    missing_bar_buffer = 16
+    required_bars = max_lookback + settings.min_training_samples + missing_bar_buffer
+    return timedelta(minutes=settings.bar_interval_minutes * required_bars)
+
+
+def _strategy_v0_max_lookback(settings: StrategyV0Config) -> int:
+    return max(
+        [item.lag for item in settings.features.lagged_returns]
+        + [item.window for item in settings.features.volatility]
+        + [settings.features.bid_ask["spread_rolling_mean_window"]]
+        + [settings.features.gold_silver_ratio_lag]
+        + [settings.features.macro["dollar_index_proxy_return_lag"]]
+    )
 
 
 def _dump_json(path: Path, payload: dict[str, Any]) -> None:
@@ -369,6 +389,7 @@ def _cached_bar_runner(
     expanded_start: datetime,
     expanded_end: datetime,
     strategy_config_path: Path | None = None,
+    warmup_duration: timedelta | None = None,
 ) -> Any:
     cfg = load_backtest_config()
     bars_by_symbol: dict[str, list[Bar]] = {}
@@ -385,6 +406,8 @@ def _cached_bar_runner(
             w_end,
             cfg.initial_equity,
             bars_by_symbol=bars_by_symbol,
+            warmup_start=w_start - warmup_duration if warmup_duration is not None else None,
+            warmup_recalibrate_at_start=warmup_duration is not None,
         )
 
     return run
@@ -469,15 +492,18 @@ def validate_strategy(
     report_dir.mkdir(parents=True, exist_ok=True)
 
     if _is_strategy_v0(strategy_path) and len(resolved_symbols) > 1:
+        warmup_duration = strategy_v0_warmup_duration(strategy_config_path)
+        max_shift = timedelta(hours=6)
         runner = _cached_bar_runner(
             legacy,
             strategy_path,
             resolved_symbols,
             run_start,
             run_end,
-            run_start - timedelta(hours=6),
-            run_end + timedelta(hours=6),
+            run_start - warmup_duration - max_shift,
+            run_end + max_shift,
             strategy_config_path=strategy_config_path,
+            warmup_duration=warmup_duration,
         )
         full = runner(run_start, run_end, base_config=strategy.config, lot_multiplier=lot_multiplier)
         f1_pass, f1_incidents = legacy.filter1(full)
@@ -529,7 +555,7 @@ def validate_strategy(
         symbols=resolved_symbols,
         start=run_start.isoformat(),
         end=run_end.isoformat(),
-        passed=bool(d2["gate_check"]["passed"] and d2["decision"]["verdict"] not in {"REJECT", "NO-OP"}),
+        passed=bool(d2["decision"]["verdict"] == "ACCEPT v_N"),
         report_dir=str(report_dir),
         markdown_report=str(markdown_path),
         json_report=str(json_path),

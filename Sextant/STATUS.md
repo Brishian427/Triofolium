@@ -1,6 +1,6 @@
 # Project Status
 
-**Last Updated:** 2026-06-25 15:25:20
+**Last Updated:** 2026-06-25 17:07:00
 **Updated By:** Codex
 
 ## Completed
@@ -91,9 +91,27 @@
 - 2026-06-25: A4 selection found `qualified_count=0`; every candidate had `trade_count=0`, `total_return=0`, `max_drawdown=0`, `risk_discipline=100`, and failed D2 Section 2 Trade Count/Active Intervals gates.
 - 2026-06-25: Stopped before Phase B/C per principal rule: with zero qualifying candidates, do not switch Risk Gate to production and do not live deploy.
 - 2026-06-25: Verified post-Phase-A code with `python -m compileall src scripts tests`, full `pytest tests -q` result `65 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, and test source files contain no `MetaTrader5` literal.
+- 2026-06-25: Built `scripts\diagnose_strategy_v0.py` and generated default 6-hour diagnostic `logs\diagnostic_v0_20260625_145247.md`; root cause for the original loop window is predictor not fitting because the window has at most 24 aligned bars while StrategyV0 needs about 144 bars after lookback/sample/buffer.
+- 2026-06-25: Added warmup-aware bar validation support in `bar_engine`, `validation.l5`, and the loop orchestrator so six-hour StrategyV0 candidate validation can prefit from pre-window bars.
+- 2026-06-25: Warmup diagnostic `logs\diagnostic_v0_20260625_144341.md` showed the next blocker: all symbols were destroyer-neutralized after initial recalibration.
+- 2026-06-25: Created sandbox candidate `sandboxes\v_diagnostic_fix` with `destroyer_validation_sharpe_threshold` changed from `0.0` to `-1.0`; D2 backtest `sandboxes\v_diagnostic_fix\reports\validation_strategy_v0_20260625_144535` still produced `trade_count=0`, `MaxDD=0`, `Risk Discipline=100`, and D2 `REJECT`.
+- 2026-06-25: Final sandbox diagnostic `logs\diagnostic_v0_20260625_144601.md` showed signals were computed but stayed below the first non-zero sizing tier; no orders were emitted.
+- 2026-06-25: Updated `scripts\demo_ui.py` to show strategy-specific backtest metrics, D2 gates, live account metrics, live strategy telemetry, and latest Risk Gate status; verified the UI at `http://127.0.0.1:8001` with HTTP 200.
+- 2026-06-25: Verified diagnostic/UI work with `python -m compileall src scripts tests`, full `pytest tests -q` result `66 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, and test source files contain no `MetaTrader5` literal.
+- 2026-06-25: Tuned multiple sandbox StrategyV0 candidates after the zero-trade diagnosis; selected `sandboxes\v_backtest_pass_candidate_i` as the first D2 6-hour gate-pass candidate.
+- 2026-06-25: Candidate `v_backtest_pass_candidate_i` passed 6-hour D2 hard gates with `trade_count=37`, `active_intervals=14`, `Risk Discipline=100`, `MaxDD=0.301949%`, and report `sandboxes\v_backtest_pass_candidate_i\reports\validation_strategy_v0_20260625_153911\validation_report.md`.
+- 2026-06-25: Added optional StrategyV0 trader controls `selected_signal_floor`, `disabled_symbols`, `max_lots_by_symbol`, and `invert_signals`; default config behavior remains unchanged unless a sandbox config enables them.
+- 2026-06-25: Aligned backtest concentration risk accounting with Risk Gate by changing `EquityTracker` concentration from raw units to notional exposure.
+- 2026-06-25: Verified tuning work with `python -m compileall src scripts tests`, full `pytest tests -q` result `71 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, and test source files contain no `MetaTrader5` literal.
+- 2026-06-25: Created reproducible Phase G script `scripts\phase_g_conviction_validation.py` and sandbox candidate `sandboxes\v_conviction_redesign` from v0 baseline without `selected_signal_floor`.
+- 2026-06-25: Ran maximum-available-window D2 validation for `v_conviction_redesign` from `2026-05-11T00:00:00Z` to `2026-06-10T23:59:59Z`; classification `d`, D2 decision `REJECT`, report `sandboxes\v_conviction_redesign\reports\validation_strategy_v0_20260625_155756\validation_report.md`.
+- 2026-06-25: Phase G metrics: `trade_count=810`, `active_intervals=355`, Total Return `-0.769944%`, MaxDD `0.835379%`, Risk Discipline `90`, Win Rate `38.78%`, Robustness `UNSTABLE`.
+- 2026-06-25: Stopped before G3 secondary validation and live deployment because Phase G classified as `d`; `config\risk_limits.yaml` remains `mode: calibration` and no MT5 live order was sent.
+- 2026-06-25: Fixed D2 machine-readable acceptance semantics so `ValidationResult.passed` is true only when D2 decision is `ACCEPT v_N`, not merely when hard gates pass.
+- 2026-06-25: Verified Phase G with `python -m compileall src scripts tests`, full `pytest tests -q` result `72 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, test source files contain no `MetaTrader5` literal, and Risk Gate mode remains calibration.
 
 ## In Progress
-- 2026-06-25: L6 runtime readiness is intentionally blocked because `config\risk_limits.yaml` remains `mode: calibration`; production mode and any live StrategyV0 start require principal approval.
+- 2026-06-25: L6 runtime readiness remains blocked because Phase G produced a no-deploy classification `d`, `config\risk_limits.yaml` remains `mode: calibration`, and no live bar-feed/order loop has been implemented.
 
 ## Not Started
 - 2026-06-22: Task 01 project code scaffold has not been created because Charter environment assumptions are not fully satisfied.
@@ -127,3 +145,7 @@
 - 2026-06-25: `mistralai/mistral-nemotron` passed minimal sanity but returned DEGRADED/400 during real navigator E2E; keep Nano fallback active for navigator and be explicit in demos that Mistral is primary-configured but not currently reliable.
 - 2026-06-25: Super architect can still return invalid hypothesis schema on first D2 prompt; keep retry/fallback active and improve prompt/schema pressure during Sonnet patch-fix phase.
 - 2026-06-25: D2 loop explored YAML threshold changes but did not produce trades; future iteration design must include binding StrategyV0 trader/predictor changes, not only config threshold relaxations.
+- 2026-06-25: StrategyV0 zero-trade state is now a serial blocker: original six-hour smoke lacked warmup, warmup then exposed all-destroyer neutralization, and the `-1.0` destroyer-threshold sandbox fix exposed signals below sizing thresholds.
+- 2026-06-25: `scripts\live_run_strategy_v0.py` remains a readiness/heartbeat harness and does not yet aggregate live bars or submit StrategyV0-generated orders; future live deployment requires a real bar-feed/order loop in addition to Risk Gate hard kills.
+- 2026-06-25: `v_backtest_pass_candidate_i` is not live-ready alpha: its 6-hour gate pass has slightly negative return and D2 decision `KEEP v_N-1`, and its 24-hour sanity check fails Risk Discipline with score `90`.
+- 2026-06-25: `v_conviction_redesign` is binding but not deployable: long-window validation trades actively yet loses money, violates Risk Discipline due concentration penalty, and fails robustness with all six perturbation rows failing Filter 2.

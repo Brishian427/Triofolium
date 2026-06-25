@@ -167,6 +167,8 @@ def bar_backtest(
     data_dir: Path | None = None,
     bar_minutes: int = 15,
     recalibrate_daily: bool = True,
+    warmup_start: datetime | None = None,
+    warmup_recalibrate_at_start: bool = False,
 ) -> BacktestResult:
     """Run a multi-symbol bar-close backtest for bar-only strategies."""
 
@@ -185,6 +187,8 @@ def bar_backtest(
         bars_by_symbol=bars_by_symbol,
         bar_minutes=bar_minutes,
         recalibrate_daily=recalibrate_daily,
+        warmup_start=warmup_start,
+        warmup_recalibrate_at_start=warmup_recalibrate_at_start,
     )
 
 
@@ -198,6 +202,8 @@ def bar_backtest_from_bars(
     bars_by_symbol: dict[str, list[Bar]],
     bar_minutes: int = 15,
     recalibrate_daily: bool = True,
+    warmup_start: datetime | None = None,
+    warmup_recalibrate_at_start: bool = False,
 ) -> BacktestResult:
     """Run a bar backtest from pre-aggregated bars, slicing by run window."""
 
@@ -210,6 +216,19 @@ def bar_backtest_from_bars(
     tracker = EquityTracker(initial_equity, executor)
     trades: list[Trade] = []
     recalibrated_dates: set[datetime.date] = set()
+
+    if warmup_start is not None and warmup_start < start and hasattr(strategy, "_append_bar"):
+        warmup_times: dict[datetime, list[Bar]] = {}
+        for bars in bars_by_symbol.values():
+            for bar in bars:
+                if warmup_start <= bar.timestamp < start:
+                    warmup_times.setdefault(bar.timestamp, []).append(bar)
+        for timestamp in sorted(warmup_times):
+            for bar in sorted(warmup_times[timestamp], key=lambda item: item.symbol):
+                if strategy.should_call_on_bar_close(bar):
+                    strategy._append_bar(bar)  # type: ignore[attr-defined]
+        if warmup_recalibrate_at_start and hasattr(strategy, "recalibrate_from_bars"):
+            strategy.recalibrate_from_bars(getattr(strategy, "_bar_history", {}))
 
     by_time: dict[datetime, list[Bar]] = {}
     quality = DataQualityStats()

@@ -55,4 +55,4 @@
 - [x] Run end-to-end loop iteration from parent `v0`.
 
 ## Current Focus
-Task 05 Plan A end-to-end iteration is complete; review NIM timeout fallback caveat and decide whether to run another raw-NIM-success iteration.
+Phase G long-window validation found StrategyV0 conviction redesign is binding but not deployable; next focus is an architectural rethink or concentration-control redesign before any live-readiness work.

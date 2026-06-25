@@ -80,16 +80,31 @@ class StrategyV0Trader:
             symbol: compute_signal(point, uncertainty, self.settings)
             for symbol, (point, uncertainty) in predictions.items()
         }
+        if self.settings.trader.invert_signals:
+            signals = {symbol: -signal for symbol, signal in signals.items()}
         directions = cross_sectional_filter(signals, self.settings)
         targets: dict[str, Decimal] = {}
+        disabled = set(self.settings.trader.disabled_symbols)
         for symbol, signal in signals.items():
-            if directions.get(symbol, 0) == 0:
+            if symbol in disabled:
                 targets[symbol] = Decimal("0")
                 continue
-            exposure = signal_to_exposure(signal, self.settings)
-            if directions[symbol] < 0 and exposure > 0:
+            direction = directions.get(symbol, 0)
+            if direction == 0:
+                targets[symbol] = Decimal("0")
+                continue
+            effective_signal = signal
+            floor = float(self.settings.trader.selected_signal_floor)
+            if floor > 0 and abs(effective_signal) < floor:
+                effective_signal = floor if direction > 0 else -floor
+            exposure = signal_to_exposure(effective_signal, self.settings)
+            if direction < 0 and exposure > 0:
                 exposure = -exposure
-            elif directions[symbol] > 0 and exposure < 0:
+            elif direction > 0 and exposure < 0:
                 exposure = -exposure
-            targets[symbol] = exposure_to_lot(symbol, exposure, equity, prices[symbol], self.settings)
+            target = exposure_to_lot(symbol, exposure, equity, prices[symbol], self.settings)
+            max_lot = self.settings.trader.max_lots_by_symbol.get(symbol)
+            if max_lot is not None and abs(target) > max_lot:
+                target = max_lot if target > 0 else -max_lot
+            targets[symbol] = target
         return targets, signals

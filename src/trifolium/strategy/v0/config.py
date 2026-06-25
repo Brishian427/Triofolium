@@ -51,6 +51,10 @@ class SizingRow(BaseModel):
 class TraderConfig(BaseModel):
     sigma_floor: Decimal
     sigmoid_scale: Decimal
+    invert_signals: bool = False
+    selected_signal_floor: Decimal = Decimal("0")
+    disabled_symbols: list[str] = Field(default_factory=list)
+    max_lots_by_symbol: dict[str, Decimal] = Field(default_factory=dict)
     top_n: int
     bottom_n: int
     sizing_table: list[SizingRow]

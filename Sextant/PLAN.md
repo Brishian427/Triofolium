@@ -72,6 +72,18 @@
 66. [done 2026-06-25] Select best candidate only if it meets trade_count, risk discipline, drawdown, and return criteria; no candidate qualified, so no-deploy was selected.
 67. [blocked 2026-06-25] Strengthen Risk Gate production hard kills including $1000 session cumulative loss from startup equity, then run L6 dry-run readiness; blocked by A4 no-qualifying-candidate stop condition.
 68. [blocked 2026-06-25] Deploy live only if D2 candidate criteria and Risk Gate hard-kill/readiness checks all pass; blocked because all 10 candidates failed D2 Section 2 Trade Count/Active Intervals.
+69. [done 2026-06-25] Diagnose StrategyV0 zero-trade root cause with 6-hour verbose internal-state backtests and write JSONL plus markdown diagnostic logs.
+70. [done 2026-06-25] Implement targeted warmup-aware validation plus sandbox `v_diagnostic_fix` destroyer-threshold change, then run a 6-hour D2 backtest.
+71. [blocked 2026-06-25] Deploy `v_diagnostic_fix` only if it produces more than 5 trades, keeps Risk Discipline at 100, and keeps MaxDD below 3%; blocked because the candidate still produced 0 trades.
+72. [done 2026-06-25] Add strategy-specific metrics visibility to the demo UI so backtest metrics and live metrics are visible to the principal.
+73. [done 2026-06-25] Tune a new sandbox StrategyV0 candidate that addresses the known zero-trade chain: validation warmup, destroyer neutralization, and low-signal sizing thresholds.
+74. [done 2026-06-25] Run D2 6-hour backtests for candidate variants and select `sandboxes\v_backtest_pass_candidate_i` as the first version that passes D2 hard gates without live deployment.
+75. [done 2026-06-25] Stop before live deployment; Risk Gate stayed in calibration mode and no MT5 live orders were sent in this tuning round.
+76. [done 2026-06-25] Create `v_conviction_redesign` from v0 baseline, preserving only destroyer-threshold, shorter-lookback, notional-concentration, and XAGUSD cap changes while dropping forced participation.
+77. [done 2026-06-25] Run D2 validation over the 30-day or maximum available historical window and classify the outcome as `d`.
+78. [done 2026-06-25] Classification was not (a), so stop without live deployment and report the StrategyV0 architecture finding honestly.
+79. [blocked 2026-06-25] Secondary 24-hour validation was not run because Phase G outcome was `d`, not (a).
+80. [done 2026-06-25] Verify compile/tests/static MT5 isolation, update Sextant, and commit pending Phase D/E/G/D2/UI work with result-coded commit message.
 
 ## Constraints
 - All project continuity state must live under `D:\Desktop\Nucleus\Triofolium\Sextant`.
@@ -98,6 +110,10 @@
 - Do not switch Brain to Super for the demo path; keep Ultra as primary and Nano as the verified fallback unless the principal changes this instruction.
 - Principal has now explicitly approved live deployment, but D2 implementation, 10-iteration candidate selection, and Risk Gate hard-kill verification are mandatory blockers before live.
 - Session loss means cumulative loss from live runner startup equity; at `session_start_equity - 1000`, emergency flatten all positions and halt the loop.
+- The diagnostic-fix path supersedes the failed 10-iteration batch only if the sandbox backtest satisfies the Phase E criteria; untested or under-trading fixes must not be deployed.
+- Do not proceed to Risk Gate production mode or live launch while the latest diagnostic candidate remains D2 `REJECT`.
+- This tuning round is sandbox-only: do not modify `config\risk_limits.yaml`, do not start `scripts\live_run_strategy_v0.py`, and do not send MT5 orders.
+- Phase G may only proceed toward live if the long-window candidate satisfies outcome (a) and the secondary 24-hour validation keeps Risk Discipline at 100; otherwise stop before production mode.
 
 ## Risks
 - 2026-06-22: Task Pool instructions may include ambiguous or high-risk work; pause for confirmation if execution would be destructive or outside the recorded goal.
@@ -139,3 +155,7 @@
 - 2026-06-25: NIM Ultra calls can be slow or return 504/timeout; final iteration records the real call attempt and uses the safe fallback hypothesis after timeout.
 - 2026-06-25: Increasing Ultra timeout to 300s can add up to several minutes to one E2E attempt; preserve fail-soft fallback and log whether the real Ultra call or fallback path was used.
 - 2026-06-25: Live deployment is high-risk; if no candidate meets D2 selection criteria or any Risk Gate hard kill is missing/failing, do not deploy despite principal approval.
+- 2026-06-25: The UI currently lacks strategy-internal backtest/live metrics; deployment review is impaired until these metrics are surfaced.
+- 2026-06-25: StrategyV0 diagnostics revealed serial zero-trade blockers; stacking additional strategy fixes after `v_diagnostic_fix` would exceed the current one-fix Phase E scope.
+- 2026-06-25: A candidate can overfit the six-hour D2 gate by forcing tiny signals to trade; mark such a version as backtest-pass candidate only, not live-ready.
+- 2026-06-25: Conviction-based redesign may reveal that StrategyV0 has consistent negative expectancy or insufficient trade density over the full available history; treat that as a valid finding rather than forcing another threshold hack.

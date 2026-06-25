@@ -65,12 +65,14 @@ class EquityTracker:
             leverage = account.margin_used * self.executor.leverage / account.equity
             if leverage > self.max_leverage_seen:
                 self.max_leverage_seen = leverage
-        total_abs = sum(abs(position.lots) * self.executor.contract_size(symbol) for symbol, position in account.positions.items())
+        notionals = []
+        for symbol, position in account.positions.items():
+            tick = account.latest_ticks.get(symbol)
+            mark = tick.mid if tick is not None else position.avg_price
+            notionals.append(abs(position.lots) * self.executor.contract_size(symbol) * mark)
+        total_abs = sum(notionals, Decimal("0"))
         if total_abs > 0:
-            concentration = max(
-                abs(position.lots) * self.executor.contract_size(symbol) / total_abs
-                for symbol, position in account.positions.items()
-            )
+            concentration = max(notional / total_abs for notional in notionals)
             if concentration > self.max_concentration_seen:
                 self.max_concentration_seen = concentration
 

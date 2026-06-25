@@ -15,7 +15,7 @@ from trifolium.agents.scope_guard import validate_hypothesis_scope
 from trifolium.backtest.config import load_backtest_config
 from trifolium.loop.types import IterationLogEntry
 from trifolium.memory.strategy_memory import StrategyMemory
-from trifolium.validation import validate_strategy
+from trifolium.validation import strategy_v0_warmup_duration, validate_strategy
 
 
 def _json_safe(value: Any) -> Any:
@@ -78,11 +78,13 @@ class LoopIteration:
     def _validate_candidate(self, sandbox_dir: Path, *, parent_nickname: str, parent_metrics: dict[str, Any], hypothesis: dict[str, Any]) -> Any:
         cfg = load_backtest_config()
         config_path = sandbox_dir / "src" / "trifolium" / "strategy" / "config" / "strategy_v0.yaml"
+        warmup = strategy_v0_warmup_duration(config_path if config_path.exists() else None)
+        smoke_start = cfg.default_start + warmup
         return self.validation_callable(
             "strategy_v0",
             symbols="all_tradable",
-            start=cfg.default_start,
-            end=cfg.default_start + timedelta(hours=6),
+            start=smoke_start,
+            end=smoke_start + timedelta(hours=6),
             report_root=sandbox_dir / "reports",
             strategy_config_path=config_path if config_path.exists() else None,
             parent_nickname=parent_nickname,

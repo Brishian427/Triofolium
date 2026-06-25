@@ -1,5 +1,45 @@
 # Technical Decision Record
 
+## 2026-06-25 Phase G Conviction-Based Redesign From v0 Baseline
+
+**Context:** Candidate `v_backtest_pass_candidate_i` passed 6-hour hard gates but failed robustness and 24-hour Risk Discipline; `selected_signal_floor` is suspected of forcing dense low-conviction participation.
+**Options:** Continue tuning from candidate I; start from v0 and keep only structural fixes; force more participation until metrics improve.
+**Decision:** Create `v_conviction_redesign` from v0 baseline, preserve only the predictor-fit and risk-accounting fixes, remove forced participation, and use lowered but still discretized conviction thresholds.
+**Rationale:** This tests whether StrategyV0's signal has genuine edge when sizing remains conviction-graded instead of participation-forced.
+**Consequences:** Outcomes (b), (c), and (d) are valid no-deploy findings. Live deployment remains blocked unless the 30-day validation meets outcome (a) and the secondary 24-hour validation also preserves Risk Discipline 100.
+
+## 2026-06-25 No-Deploy After Phase G Classification d
+
+**Context:** `v_conviction_redesign` traded actively over the maximum available window but produced negative return, Risk Discipline `90`, and Robustness `UNSTABLE`.
+**Options:** Deploy despite D2 hard-gate failure; continue threshold hacking; stop and record the architecture finding.
+**Decision:** Stop before G3, do not run live deployment, and classify the result as Phase G outcome `d`.
+**Rationale:** D2 Section 2 Risk Discipline failed and D2 Section 6 Robustness failed; no secondary metric can override a hard-gate or robustness violation.
+**Consequences:** Risk Gate remains in calibration mode. The next valid work is architectural redesign or concentration-control redesign, not live launch.
+
+## 2026-06-25 Select v_backtest_pass_candidate_i As First Backtest-Gate-Pass Candidate
+
+**Context:** The latest principal request was to tune a strategy version that can pass backtest first and explicitly not go live. Multiple sandbox candidates addressed warmup, destroyer neutralization, sizing thresholds, and concentration risk.
+**Options:** Keep the last zero-trade diagnostic candidate; select the first candidate passing D2 6-hour hard gates; continue tuning until positive/robust performance appears in the same round.
+**Decision:** Select `sandboxes\v_backtest_pass_candidate_i` as the first sandbox candidate that passes D2 6-hour hard gates, but only as a backtest-gate-pass artifact.
+**Rationale:** Candidate I produced 37 trades, 14 active intervals, Risk Discipline 100, and MaxDD 0.301949% in the 6-hour D2 backtest while preserving the no-live constraint.
+**Consequences:** Candidate I is not promoted to live: its 6-hour return is negative, D2 decision is `KEEP v_N-1`, and the 24-hour sanity check fails Risk Discipline with score 90. Future work should improve return and robustness before any L6/live path resumes.
+
+## 2026-06-25 Sandbox-Only Backtest Tuning Before Live
+
+**Context:** The principal requested a strategy version that can pass backtest first and explicitly said not to go live.
+**Options:** Modify live StrategyV0 config directly; tune in sandbox and only promote after passing backtest review; go straight to production/live.
+**Decision:** Tune only sandbox StrategyV0 candidates and stop after backtest results.
+**Rationale:** The last candidate failed D2 trade gates, and live runner/risk production readiness remain separate blockers.
+**Consequences:** This round may produce a backtest-pass candidate artifact, but it is not live-deployed and does not change Risk Gate production mode.
+
+## 2026-06-25 Stop Live Deployment After Diagnostic Fix Failed Phase E
+
+**Context:** The principal approved conditional live deployment after a diagnostic fix, but Phase E required `v_diagnostic_fix` to produce more than 5 trades, keep Risk Discipline at 100, and keep MaxDD below 3%.
+**Options:** Deploy despite the failed diagnostic fix; stack additional strategy changes until trades appear; stop and report the serial zero-trade blockers.
+**Decision:** Stop before production mode and live deployment because `v_diagnostic_fix` still produced 0 trades and D2 `REJECT`.
+**Rationale:** The explicit Phase E deployment gate was not met, and stacking more fixes would exceed the requested one-fix diagnostic scope.
+**Consequences:** Risk Gate remains in calibration mode. The next candidate should target the sizing-threshold blocker, and live deployment also needs a real bar-feed/order loop because the current live runner is still a readiness/heartbeat harness.
+
 ## 2026-06-25 Architecture 5 Robust Tiered Brain
 
 **Context:** Ultra 550B remained unavailable after 300s timeout tests, and the principal requested a robust two-tier Brain architecture for Task 05.
