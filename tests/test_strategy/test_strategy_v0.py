@@ -3,9 +3,9 @@ from decimal import Decimal
 
 from trifolium.backtest.types import AccountState, Bar, Tick
 from trifolium.strategy.v0.config import SizingRow, load_strategy_v0_config
-from trifolium.strategy.v0.portfolio import apply_portfolio_scaling, check_gross_leverage
+from trifolium.strategy.v0.portfolio import apply_portfolio_scaling, check_gross_leverage, check_single_symbol_concentration
 from trifolium.strategy.v0.strategy import StrategyV0
-from trifolium.strategy.v0.trader import StrategyV0Trader, compute_signal, cross_sectional_filter, exposure_to_lot, signal_to_exposure
+from trifolium.strategy.v0.trader import StrategyV0Trader, compute_signal, cross_sectional_filter, exposure_to_lot, passes_cost_gate, signal_to_exposure
 
 
 def test_strategy_v0_config_loads() -> None:
@@ -128,6 +128,16 @@ def test_invert_signals_flips_cross_sectional_direction() -> None:
     assert targets["AUDUSD"] > 0
 
 
+def test_cost_gate_blocks_signal_when_spread_proxy_exceeds_edge() -> None:
+    settings = load_strategy_v0_config()
+    tuned_trader = settings.trader.model_copy(update={"cost_gate_spread_multiplier": Decimal("100"), "cost_gate_min_abs_signal": Decimal("0.05")})
+    tuned = settings.model_copy(update={"trader": tuned_trader})
+
+    assert not passes_cost_gate("EURUSD", 0.001, 0.10, Decimal("1.0"), Decimal("0.0002"), tuned)
+    assert not passes_cost_gate("EURUSD", 0.050, 0.01, Decimal("1.0"), Decimal("0.0002"), tuned)
+    assert passes_cost_gate("EURUSD", 0.050, 0.10, Decimal("1.0"), Decimal("0.0002"), tuned)
+
+
 def test_portfolio_scaling_reduces_gross_leverage() -> None:
     settings = load_strategy_v0_config()
     prices = {symbol: Decimal("1") for symbol in settings.tradable_symbols}
@@ -142,6 +152,22 @@ def test_portfolio_scaling_reduces_gross_leverage() -> None:
         settings,
     )
     assert ok
+
+
+def test_portfolio_scaling_caps_single_symbol_concentration() -> None:
+    settings = load_strategy_v0_config()
+    tuned_portfolio = settings.portfolio.model_copy(update={"max_single_symbol_concentration_pct": Decimal("35"), "max_symbol_notional_pct": Decimal("100")})
+    tuned = settings.model_copy(update={"portfolio": tuned_portfolio})
+    prices = {symbol: Decimal("1") for symbol in settings.tradable_symbols}
+    prices["XAUUSD"] = Decimal("2300")
+    prices["XAGUSD"] = Decimal("30")
+    targets = {"EURUSD": Decimal("3"), "GBPUSD": Decimal("0.5"), "AUDUSD": Decimal("-0.5")}
+
+    scaled, _scale, _messages = apply_portfolio_scaling(targets, prices, Decimal("1000000"), tuned)
+    positions = [(symbol, lot, prices[symbol]) for symbol, lot in scaled.items() if lot != 0]
+    ok, message = check_single_symbol_concentration(positions, Decimal("1000000"), tuned)
+
+    assert ok, message
 
 
 def test_strategy_v0_instantiates_and_stays_flat_without_training() -> None:
@@ -164,3 +190,13 @@ def test_strategy_v0_instantiates_and_stays_flat_without_training() -> None:
     )
     assert strategy.on_tick(account.latest_ticks["EURUSD"], account) == []
     assert strategy.on_bar_close(bar, account) == []
+
+
+def test_session_gate_flattens_outside_allowed_sessions() -> None:
+    settings = load_strategy_v0_config()
+    tuned_trader = settings.trader.model_copy(update={"allowed_sessions": ["london_morning"], "flatten_disallowed_sessions": True})
+    tuned = settings.model_copy(update={"trader": tuned_trader})
+
+    assert StrategyV0._session_name(datetime(2026, 1, 1, 8, tzinfo=timezone.utc)) == "london_morning"
+    assert StrategyV0._session_name(datetime(2026, 1, 1, 18, tzinfo=timezone.utc)) == "ny_afternoon"
+    assert tuned.trader.allowed_sessions == ["london_morning"]

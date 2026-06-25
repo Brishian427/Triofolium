@@ -240,8 +240,16 @@ def _build_d2_report(
         decision = "KEEP v_N-1"
         reason = "Candidate passed gates but failed robustness sweep."
         next_experiment = "Try a less isolated parameter change."
+    elif total_return_pct <= 0 and parent_return_pct is None:
+        decision = "KEEP v_N-1"
+        reason = "Candidate passed gates and robustness but has non-positive total return."
+        next_experiment = "Find a positive-return edge before considering deployment."
+    elif return_delta_pct is not None and return_delta_pct < 0:
+        decision = "KEEP v_N-1"
+        reason = "Candidate passed gates and robustness but underperformed its parent."
+        next_experiment = "Improve total return while preserving all Section 2 gates."
     else:
-        decision = "ACCEPT v_N" if return_delta_pct is None or return_delta_pct >= 0 else "KEEP v_N-1"
+        decision = "ACCEPT v_N"
         reason = "Gate-first evaluation passed; primary objective and robustness decide acceptance."
         next_experiment = "Improve total return while preserving all Section 2 gates."
 

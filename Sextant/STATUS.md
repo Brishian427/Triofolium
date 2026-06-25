@@ -1,6 +1,6 @@
 # Project Status
 
-**Last Updated:** 2026-06-25 17:07:00
+**Last Updated:** 2026-06-25 17:41:03
 **Updated By:** Codex
 
 ## Completed
@@ -109,9 +109,15 @@
 - 2026-06-25: Stopped before G3 secondary validation and live deployment because Phase G classified as `d`; `config\risk_limits.yaml` remains `mode: calibration` and no MT5 live order was sent.
 - 2026-06-25: Fixed D2 machine-readable acceptance semantics so `ValidationResult.passed` is true only when D2 decision is `ACCEPT v_N`, not merely when hard gates pass.
 - 2026-06-25: Verified Phase G with `python -m compileall src scripts tests`, full `pytest tests -q` result `72 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, test source files contain no `MetaTrader5` literal, and Risk Gate mode remains calibration.
+- 2026-06-25: Added Phase H attribution tooling `scripts\strategy_attribution.py`; Phase G attribution showed XAGUSD was the largest realized drag and off-session/NY afternoon were the weakest sessions.
+- 2026-06-25: Added optional StrategyV0 controls for cost-proxy gating, session gating with flattening, per-symbol notional caps, and max single-symbol concentration budgeting; defaults preserve existing behavior.
+- 2026-06-25: Created and validated sandbox `v_fx_only_risk_budgeted`; it passed D2 hard gates with Risk Discipline `100` but failed robustness with Total Return `-0.006152%`, `trade_count=126`, MaxDD `0.014392%`, and classification `d`.
+- 2026-06-25: Created and validated stricter sandbox `v_fx_only_risk_budgeted_h2_strict`; it passed D2 hard gates and robustness with `trade_count=98`, Risk Discipline `100`, MaxDD `0.002749%`, Win Rate `53.06%`, but Total Return was `-0.000400%`, so classification `b` and no deployment.
+- 2026-06-25: Fixed D2 decision logic so robust candidates with non-positive total return and no parent are `KEEP v_N-1`, not `ACCEPT v_N`; H2 report now matches classification `b`.
+- 2026-06-25: Verified Phase H with `python -m compileall src scripts tests`, full `pytest tests -q` result `78 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, test source files contain no `MetaTrader5` literal, and Risk Gate mode remains calibration.
 
 ## In Progress
-- 2026-06-25: L6 runtime readiness remains blocked because Phase G produced a no-deploy classification `d`, `config\risk_limits.yaml` remains `mode: calibration`, and no live bar-feed/order loop has been implemented.
+- 2026-06-25: L6 runtime readiness remains blocked because Phase H best candidate is classification `b` with non-positive return, `config\risk_limits.yaml` remains `mode: calibration`, and no live bar-feed/order loop has been implemented.
 
 ## Not Started
 - 2026-06-22: Task 01 project code scaffold has not been created because Charter environment assumptions are not fully satisfied.
@@ -149,3 +155,4 @@
 - 2026-06-25: `scripts\live_run_strategy_v0.py` remains a readiness/heartbeat harness and does not yet aggregate live bars or submit StrategyV0-generated orders; future live deployment requires a real bar-feed/order loop in addition to Risk Gate hard kills.
 - 2026-06-25: `v_backtest_pass_candidate_i` is not live-ready alpha: its 6-hour gate pass has slightly negative return and D2 decision `KEEP v_N-1`, and its 24-hour sanity check fails Risk Discipline with score `90`.
 - 2026-06-25: `v_conviction_redesign` is binding but not deployable: long-window validation trades actively yet loses money, violates Risk Discipline due concentration penalty, and fails robustness with all six perturbation rows failing Filter 2.
+- 2026-06-25: `v_fx_only_risk_budgeted_h2_strict` fixes risk discipline and robustness but still has no positive edge over the long window; next improvement needs a new alpha architecture, not another risk wrapper.

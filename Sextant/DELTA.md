@@ -2,6 +2,63 @@
 
 Newest entries first. Insert each new round immediately below this title.
 
+## 2026-06-25 17:41:03 - Phase H Risk-Budgeted FX Improvement No-Deploy
+
+Time: 2026-06-25 17:41:03
+Title: Phase H Risk-Budgeted FX Improvement No-Deploy
+Context: The principal asked to start improving after Phase G. Phase H added attribution, cost/risk/session controls, and tested FX-only risk-budgeted candidates.
+
+Sextant Details:
+### PLAN
+#### Steps
+81. [done 2026-06-25] Start Phase H by adding attribution tooling for Phase G results: symbol/day/session PnL, trade count, win rate, spread cost proxy, and concentration evidence.
+82. [done 2026-06-25] Add optional StrategyV0 controls for cost-aware entry gating and risk-budgeted portfolio sizing while preserving default behavior.
+83. [done 2026-06-25] Create sandbox candidate `v_fx_only_risk_budgeted` from v0-family lessons: FX-only, short lookback, no forced participation, cost gate, and symbol risk budget.
+84. [done 2026-06-25] Run maximum-window D2 validation for `v_fx_only_risk_budgeted` and stricter H2 variant; stop before live because best result is classification `b`, not positive-return deployment candidate.
+85. [done 2026-06-25] Run compile/tests/static MT5 isolation, update Sextant, and commit Phase H result.
+#### Constraints
+- Phase H remains sandbox-only: do not switch Risk Gate production mode, do not launch `scripts\live_run_strategy_v0.py`, and do not send MT5 orders.
+#### Risks
+- 2026-06-25: Removing metals may improve concentration but also remove profitable diversification; Phase H must treat a lower-trade or negative-return FX-only result as useful evidence, not a reason to reintroduce forced participation.
+
+### STATUS
+#### Metadata
+**Last Updated:** 2026-06-25 17:41:03
+#### Completed
+- 2026-06-25: Added Phase H attribution tooling `scripts\strategy_attribution.py`; Phase G attribution showed XAGUSD was the largest realized drag and off-session/NY afternoon were the weakest sessions.
+- 2026-06-25: Added optional StrategyV0 controls for cost-proxy gating, session gating with flattening, per-symbol notional caps, and max single-symbol concentration budgeting; defaults preserve existing behavior.
+- 2026-06-25: Created and validated sandbox `v_fx_only_risk_budgeted`; it passed D2 hard gates with Risk Discipline `100` but failed robustness with Total Return `-0.006152%`, `trade_count=126`, MaxDD `0.014392%`, and classification `d`.
+- 2026-06-25: Created and validated stricter sandbox `v_fx_only_risk_budgeted_h2_strict`; it passed D2 hard gates and robustness with `trade_count=98`, Risk Discipline `100`, MaxDD `0.002749%`, Win Rate `53.06%`, but Total Return was `-0.000400%`, so classification `b` and no deployment.
+- 2026-06-25: Fixed D2 decision logic so robust candidates with non-positive total return and no parent are `KEEP v_N-1`, not `ACCEPT v_N`; H2 report now matches classification `b`.
+- 2026-06-25: Verified Phase H with `python -m compileall src scripts tests`, full `pytest tests -q` result `78 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, test source files contain no `MetaTrader5` literal, and Risk Gate mode remains calibration.
+#### In Progress
+- 2026-06-25: L6 runtime readiness remains blocked because Phase H best candidate is classification `b` with non-positive return, `config\risk_limits.yaml` remains `mode: calibration`, and no live bar-feed/order loop has been implemented.
+#### Not Started
+[None]
+#### Known Issues
+- 2026-06-25: `v_fx_only_risk_budgeted_h2_strict` fixes risk discipline and robustness but still has no positive edge over the long window; next improvement needs a new alpha architecture, not another risk wrapper.
+
+### DECISIONS
+#### 2026-06-25 No-Deploy After Phase H Classification b
+**Context:** Phase H H2 strict candidate passed hard gates and robustness, but long-window Total Return remained slightly negative.
+**Options:** Deploy a risk-clean but non-positive candidate; keep tightening risk wrappers; stop and require a new alpha architecture.
+**Decision:** Do not deploy `v_fx_only_risk_budgeted_h2_strict`; classify it as outcome `b`.
+**Rationale:** The risk wrapper succeeded, but D2 primary objective did not: non-positive total return means there is no validated edge to deploy.
+**Consequences:** Future work should focus on signal architecture or target formulation rather than more portfolio/risk shell improvements around the same v0 predictor.
+
+### JOURNAL
+#### [2026-06-25 17:41:03] Session 24
+**Goal:** Start Phase H improvement from the Phase G finding by adding attribution, cost-aware/risk-budgeted controls, and an FX-only candidate.
+**Actually Completed:** Built attribution tooling, identified XAGUSD and off-session/NY afternoon as major drags, added optional cost-proxy gate, session gate with flattening, per-symbol notional cap, and concentration budget controls, validated `v_fx_only_risk_budgeted`, then validated stricter `v_fx_only_risk_budgeted_h2_strict`. H2 passed hard gates and robustness but had non-positive return, so deployment remains stopped.
+**Issues Encountered:** H2 proves the risk wrapper can make StrategyV0 safe and robust, but it still does not create positive long-window alpha.
+**Next Session Starting Point:** Design a new alpha architecture or target formulation; do not spend the next round merely tightening v0 risk controls.
+
+### GOAL
+#### Completion Criteria
+[None]
+#### Current Focus
+Phase H produced a robust, risk-clean FX-only candidate but still no positive long-window edge; next focus is new alpha architecture rather than more StrategyV0 risk wrapping.
+
 ## 2026-06-25 17:07:00 - Phase G Conviction Redesign No-Deploy
 
 Time: 2026-06-25 17:07:00

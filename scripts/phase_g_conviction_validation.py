@@ -88,10 +88,16 @@ def classify_result(result: Any) -> tuple[str, str]:
     return "b", "robust but non-positive long-window return: consistent but no edge"
 
 
-def summarize_result(result: Any, classification: str, reason: str, candidate_config_path: Path) -> dict[str, Any]:
+def summarize_result(
+    result: Any,
+    classification: str,
+    reason: str,
+    candidate_config_path: Path,
+    candidate_name: str = "v_conviction_redesign",
+) -> dict[str, Any]:
     d2 = result.d2
     return {
-        "candidate": "v_conviction_redesign",
+        "candidate": candidate_name,
         "classification": classification,
         "reason": reason,
         "candidate_config_path": str(candidate_config_path),

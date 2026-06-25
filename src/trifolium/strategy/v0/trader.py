@@ -48,6 +48,29 @@ def cross_sectional_filter(signals_per_symbol: dict[str, float], settings: Strat
     return result
 
 
+def passes_cost_gate(
+    symbol: str,
+    point_estimate: float,
+    compressed_signal: float,
+    price: Decimal,
+    spread: Decimal | None,
+    settings: StrategyV0Config,
+) -> bool:
+    """Return whether a rank-edge proxy is large enough versus current spread."""
+
+    min_signal = settings.trader.cost_gate_min_abs_signal
+    if min_signal > 0 and Decimal(str(abs(compressed_signal))) < min_signal:
+        return False
+    multiplier = settings.trader.cost_gate_spread_multiplier
+    if multiplier <= 0:
+        return True
+    if spread is None or price <= 0:
+        return False
+    spread_return = spread / price
+    required_edge = spread_return * multiplier
+    return Decimal(str(abs(point_estimate))) > required_edge
+
+
 def exposure_to_lot(symbol: str, exposure_pct: Decimal, equity: Decimal, current_price: Decimal, settings: StrategyV0Config) -> Decimal:
     """Convert signed exposure fraction into signed broker lots."""
 
@@ -75,6 +98,7 @@ class StrategyV0Trader:
         predictions: dict[str, tuple[float, float]],
         equity: Decimal,
         prices: dict[str, Decimal],
+        spreads: dict[str, Decimal] | None = None,
     ) -> tuple[dict[str, Decimal], dict[str, float]]:
         signals = {
             symbol: compute_signal(point, uncertainty, self.settings)
@@ -82,6 +106,20 @@ class StrategyV0Trader:
         }
         if self.settings.trader.invert_signals:
             signals = {symbol: -signal for symbol, signal in signals.items()}
+        if self.settings.trader.cost_gate_spread_multiplier > 0 or self.settings.trader.cost_gate_min_abs_signal > 0:
+            gated_signals: dict[str, float] = {}
+            for symbol, signal in signals.items():
+                point, _uncertainty = predictions[symbol]
+                passed = passes_cost_gate(
+                    symbol,
+                    point,
+                    signal,
+                    prices[symbol],
+                    None if spreads is None else spreads.get(symbol),
+                    self.settings,
+                )
+                gated_signals[symbol] = signal if passed else 0.0
+            signals = gated_signals
         directions = cross_sectional_filter(signals, self.settings)
         targets: dict[str, Decimal] = {}
         disabled = set(self.settings.trader.disabled_symbols)

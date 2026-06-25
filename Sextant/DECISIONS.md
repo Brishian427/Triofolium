@@ -16,6 +16,22 @@
 **Rationale:** D2 Section 2 Risk Discipline failed and D2 Section 6 Robustness failed; no secondary metric can override a hard-gate or robustness violation.
 **Consequences:** Risk Gate remains in calibration mode. The next valid work is architectural redesign or concentration-control redesign, not live launch.
 
+## 2026-06-25 Phase H Attribution First, Then Risk-Budgeted FX Candidate
+
+**Context:** Phase G showed active trading with negative expectancy, concentration penalty, and robustness failure; further threshold tweaking would likely repeat the same failure mode.
+**Options:** Continue threshold tuning; add forced participation again; build attribution and a cost-aware/risk-budgeted candidate.
+**Decision:** Start Phase H with attribution tooling, then test a sandbox `v_fx_only_risk_budgeted` candidate using optional cost and risk-budget controls.
+**Rationale:** The next experiment should separate alpha failure from portfolio construction failure and prevent concentration violations by construction.
+**Consequences:** Live deployment stays blocked. If the FX-only risk-budgeted candidate fails, the conclusion will be about StrategyV0 architecture rather than another threshold search.
+
+## 2026-06-25 No-Deploy After Phase H Classification b
+
+**Context:** Phase H H2 strict candidate passed hard gates and robustness, but long-window Total Return remained slightly negative.
+**Options:** Deploy a risk-clean but non-positive candidate; keep tightening risk wrappers; stop and require a new alpha architecture.
+**Decision:** Do not deploy `v_fx_only_risk_budgeted_h2_strict`; classify it as outcome `b`.
+**Rationale:** The risk wrapper succeeded, but D2 primary objective did not: non-positive total return means there is no validated edge to deploy.
+**Consequences:** Future work should focus on signal architecture or target formulation rather than more portfolio/risk shell improvements around the same v0 predictor.
+
 ## 2026-06-25 Select v_backtest_pass_candidate_i As First Backtest-Gate-Pass Candidate
 
 **Context:** The latest principal request was to tune a strategy version that can pass backtest first and explicitly not go live. Multiple sandbox candidates addressed warmup, destroyer neutralization, sizing thresholds, and concentration risk.

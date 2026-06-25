@@ -55,4 +55,4 @@
 - [x] Run end-to-end loop iteration from parent `v0`.
 
 ## Current Focus
-Phase G long-window validation found StrategyV0 conviction redesign is binding but not deployable; next focus is an architectural rethink or concentration-control redesign before any live-readiness work.
+Phase H produced a robust, risk-clean FX-only candidate but still no positive long-window edge; next focus is new alpha architecture rather than more StrategyV0 risk wrapping.

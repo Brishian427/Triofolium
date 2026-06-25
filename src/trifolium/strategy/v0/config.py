@@ -55,6 +55,10 @@ class TraderConfig(BaseModel):
     selected_signal_floor: Decimal = Decimal("0")
     disabled_symbols: list[str] = Field(default_factory=list)
     max_lots_by_symbol: dict[str, Decimal] = Field(default_factory=dict)
+    cost_gate_spread_multiplier: Decimal = Decimal("0")
+    cost_gate_min_abs_signal: Decimal = Decimal("0")
+    allowed_sessions: list[str] = Field(default_factory=list)
+    flatten_disallowed_sessions: bool = False
     top_n: int
     bottom_n: int
     sizing_table: list[SizingRow]
@@ -65,6 +69,8 @@ class PortfolioConfig(BaseModel):
     metals_threshold_pct: Decimal
     gross_leverage_threshold: Decimal
     scaling_steps: int
+    max_single_symbol_concentration_pct: Decimal = Decimal("100")
+    max_symbol_notional_pct: Decimal = Decimal("100")
 
 
 class RiskGateConfig(BaseModel):

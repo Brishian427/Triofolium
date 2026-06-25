@@ -77,8 +77,16 @@ class StrategyV0(Strategy):
         if not all(self._has_bar_at_timestamp(symbol, bar.timestamp) for symbol in self._settings.tradable_symbols):
             return []
         self._last_decision_bar = bar.timestamp
+        if not self._session_allowed(bar.timestamp):
+            if self._settings.trader.flatten_disallowed_sessions:
+                return self._orders_from_targets({symbol: Decimal("0") for symbol in self._settings.tradable_symbols}, state)
+            return []
         prices = {
             symbol: state.latest_ticks[symbol].mid
+            for symbol in self._settings.tradable_symbols
+        }
+        spreads = {
+            symbol: state.latest_ticks[symbol].spread
             for symbol in self._settings.tradable_symbols
         }
         if not self._predictor.has_active_models:
@@ -86,7 +94,7 @@ class StrategyV0(Strategy):
         predictions = self._predictor.predict_from_bars(self._recent_prediction_history())
         if not predictions:
             return []
-        target_lots, signals = self._trader.target_lots(predictions, state.equity, prices)
+        target_lots, signals = self._trader.target_lots(predictions, state.equity, prices, spreads=spreads)
         self._last_signals = signals
         scaled_lots, _scale, messages = apply_portfolio_scaling(target_lots, prices, state.equity, self._settings)
         self._portfolio_messages = messages
@@ -118,6 +126,23 @@ class StrategyV0(Strategy):
     def _recent_prediction_history(self) -> dict[str, list[BarSnapshot]]:
         lookback = self._predictor.feature_builder.max_lookback + 2
         return {symbol: bars[-lookback:] for symbol, bars in self._bar_history.items()}
+
+    def _session_allowed(self, timestamp: datetime) -> bool:
+        allowed = set(self._settings.trader.allowed_sessions)
+        if not allowed:
+            return True
+        return self._session_name(timestamp) in allowed
+
+    @staticmethod
+    def _session_name(timestamp: datetime) -> str:
+        hour = timestamp.hour
+        if 7 <= hour < 12:
+            return "london_morning"
+        if 12 <= hour < 16:
+            return "london_ny_overlap"
+        if 16 <= hour < 21:
+            return "ny_afternoon"
+        return "off_session"
 
     def _orders_from_targets(self, target_lots: dict[str, Decimal], state: AccountState) -> list[Order]:
         orders: list[Order] = []

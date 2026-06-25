@@ -84,6 +84,11 @@
 78. [done 2026-06-25] Classification was not (a), so stop without live deployment and report the StrategyV0 architecture finding honestly.
 79. [blocked 2026-06-25] Secondary 24-hour validation was not run because Phase G outcome was `d`, not (a).
 80. [done 2026-06-25] Verify compile/tests/static MT5 isolation, update Sextant, and commit pending Phase D/E/G/D2/UI work with result-coded commit message.
+81. [done 2026-06-25] Start Phase H by adding attribution tooling for Phase G results: symbol/day/session PnL, trade count, win rate, spread cost proxy, and concentration evidence.
+82. [done 2026-06-25] Add optional StrategyV0 controls for cost-aware entry gating and risk-budgeted portfolio sizing while preserving default behavior.
+83. [done 2026-06-25] Create sandbox candidate `v_fx_only_risk_budgeted` from v0-family lessons: FX-only, short lookback, no forced participation, cost gate, and symbol risk budget.
+84. [done 2026-06-25] Run maximum-window D2 validation for `v_fx_only_risk_budgeted` and stricter H2 variant; stop before live because best result is classification `b`, not positive-return deployment candidate.
+85. [done 2026-06-25] Run compile/tests/static MT5 isolation, update Sextant, and commit Phase H result.
 
 ## Constraints
 - All project continuity state must live under `D:\Desktop\Nucleus\Triofolium\Sextant`.
@@ -114,6 +119,7 @@
 - Do not proceed to Risk Gate production mode or live launch while the latest diagnostic candidate remains D2 `REJECT`.
 - This tuning round is sandbox-only: do not modify `config\risk_limits.yaml`, do not start `scripts\live_run_strategy_v0.py`, and do not send MT5 orders.
 - Phase G may only proceed toward live if the long-window candidate satisfies outcome (a) and the secondary 24-hour validation keeps Risk Discipline at 100; otherwise stop before production mode.
+- Phase H remains sandbox-only: do not switch Risk Gate production mode, do not launch `scripts\live_run_strategy_v0.py`, and do not send MT5 orders.
 
 ## Risks
 - 2026-06-22: Task Pool instructions may include ambiguous or high-risk work; pause for confirmation if execution would be destructive or outside the recorded goal.
@@ -159,3 +165,4 @@
 - 2026-06-25: StrategyV0 diagnostics revealed serial zero-trade blockers; stacking additional strategy fixes after `v_diagnostic_fix` would exceed the current one-fix Phase E scope.
 - 2026-06-25: A candidate can overfit the six-hour D2 gate by forcing tiny signals to trade; mark such a version as backtest-pass candidate only, not live-ready.
 - 2026-06-25: Conviction-based redesign may reveal that StrategyV0 has consistent negative expectancy or insufficient trade density over the full available history; treat that as a valid finding rather than forcing another threshold hack.
+- 2026-06-25: Removing metals may improve concentration but also remove profitable diversification; Phase H must treat a lower-trade or negative-return FX-only result as useful evidence, not a reason to reintroduce forced participation.

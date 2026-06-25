@@ -1,7 +1,10 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from decimal import Decimal
 
+from trifolium.backtest.types import BacktestResult, DataQualityStats, EquityPoint, Trade
+from trifolium.validation.l5 import _build_d2_report
 from trifolium.validation import validate_strategy
 
 
@@ -47,3 +50,58 @@ def test_l5_callable_returns_machine_readable_result(tmp_path):
         "## Section 9 - Decision",
     ]
     assert [heading for heading in expected_headings if heading in markdown] == expected_headings
+
+
+def test_d2_does_not_accept_non_positive_return_without_parent(tmp_path):
+    start = datetime(2026, 5, 11, tzinfo=timezone.utc)
+    trades = [
+        Trade(
+            timestamp=start + timedelta(minutes=15 * index),
+            symbol="AUDUSD",
+            side="buy",
+            lots=Decimal("0.01"),
+            price=Decimal("1.0"),
+            realized_pnl=Decimal("1") if index % 2 == 0 else Decimal("-1"),
+            equity_after=Decimal("999999"),
+            tag="test",
+        )
+        for index in range(30)
+    ]
+    full = BacktestResult(
+        strategy_name="strategy_v0",
+        symbols=["AUDUSD"],
+        start=start,
+        end=start + timedelta(hours=8),
+        initial_equity=Decimal("1000000"),
+        final_equity=Decimal("999999"),
+        total_return=Decimal("-0.000001"),
+        max_drawdown=Decimal("0.001"),
+        sharpe=Decimal("-0.1"),
+        projected_risk_discipline=Decimal("100"),
+        trade_count=30,
+        trades=trades,
+        equity_curve=[
+            EquityPoint(timestamp=start, equity=Decimal("1000000"), balance=Decimal("1000000"), margin_used=Decimal("0"), margin_level=None),
+            EquityPoint(timestamp=start + timedelta(hours=8), equity=Decimal("999999"), balance=Decimal("999999"), margin_used=Decimal("0"), margin_level=None),
+        ],
+        data_quality=DataQualityStats(),
+        stop_out_events=[],
+        risk_events=[],
+    )
+
+    d2 = _build_d2_report(
+        full=full,
+        f1=(True, []),
+        windows=[full],
+        f2_metrics={"worst_dd": 0.001, "cv": 0.0, "negative_fraction": 0.0},
+        f2_pass=True,
+        f3_rows=[{"kind": "parameter", "case": "1.0", "filter2": True}],
+        f3_pass=True,
+        plots=(tmp_path / "a.png", tmp_path / "b.png", tmp_path / "c.png"),
+        symbols=["AUDUSD"],
+        report_dir=tmp_path,
+    )
+
+    assert d2["gate_check"]["passed"] is True
+    assert d2["robustness"]["verdict"] == "ROBUST"
+    assert d2["decision"]["verdict"] == "KEEP v_N-1"

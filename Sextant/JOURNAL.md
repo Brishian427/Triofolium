@@ -1081,3 +1081,29 @@ D:\Desktop\Nucleus\Triofolium\
 - `D:\Desktop\Nucleus\Triofolium\Sextant\DELTA.md`
 **Issues Encountered:** `v_conviction_redesign` is binding and active but not deployable: 810 trades, Total Return `-0.769944%`, Risk Discipline `90`, and Robustness `UNSTABLE`.
 **Next Session Starting Point:** Treat StrategyV0 v0-family as failing current IMC deployment principles until an architecture/concentration redesign is specified and validated.
+
+## [2026-06-25 17:41:03] Session 24
+
+**Goal:** Start Phase H improvement from the Phase G finding by adding attribution, cost-aware/risk-budgeted controls, and an FX-only candidate.
+**Actually Completed:** Built attribution tooling, identified XAGUSD and off-session/NY afternoon as major drags, added optional cost-proxy gate, session gate with flattening, per-symbol notional cap, and concentration budget controls, validated `v_fx_only_risk_budgeted`, then validated stricter `v_fx_only_risk_budgeted_h2_strict`. H2 passed hard gates and robustness but had non-positive return, so deployment remains stopped.
+**Files Created:**
+- `D:\Desktop\Nucleus\Triofolium\scripts\strategy_attribution.py`
+- `D:\Desktop\Nucleus\Triofolium\scripts\phase_h_risk_budgeted_validation.py`
+- `D:\Desktop\Nucleus\Triofolium\tests\test_strategy\test_phase_h_risk_budgeted.py`
+**Files Modified:**
+- `D:\Desktop\Nucleus\Triofolium\scripts\phase_g_conviction_validation.py`
+- `D:\Desktop\Nucleus\Triofolium\src\trifolium\strategy\v0\config.py`
+- `D:\Desktop\Nucleus\Triofolium\src\trifolium\strategy\v0\portfolio.py`
+- `D:\Desktop\Nucleus\Triofolium\src\trifolium\strategy\v0\strategy.py`
+- `D:\Desktop\Nucleus\Triofolium\src\trifolium\strategy\v0\trader.py`
+- `D:\Desktop\Nucleus\Triofolium\src\trifolium\validation\l5.py`
+- `D:\Desktop\Nucleus\Triofolium\tests\test_strategy\test_strategy_v0.py`
+- `D:\Desktop\Nucleus\Triofolium\tests\test_validation\test_l5_callable.py`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\STATUS.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\GOAL.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\PLAN.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\DECISIONS.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\JOURNAL.md`
+- `D:\Desktop\Nucleus\Triofolium\Sextant\DELTA.md`
+**Issues Encountered:** H2 proves the risk wrapper can make StrategyV0 safe and robust, but it still does not create positive long-window alpha.
+**Next Session Starting Point:** Design a new alpha architecture or target formulation; do not spend the next round merely tightening v0 risk controls.
