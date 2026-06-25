@@ -1,0 +1,45 @@
+loop:
+  iteration_window_hours: 6
+  min_seconds_between_iterations: 60
+  max_iterations_per_day: 50
+  parent_strategy_default: "v0"
+
+brain:
+  model: "nvidia/nemotron-3-ultra-550b-a55b"
+  fallback_model: "nvidia/nemotron-3-super-120b-a12b"
+  smoke_model: "nvidia/nemotron-3-nano-30b-a3b"
+  reasoning_budget: 8192
+  timeout_seconds: 300
+  max_retries: 2
+  temperature: 0.7
+
+coder:
+  model: "claude-sonnet-4-6"
+  max_tokens: 4096
+  temperature: 0.3
+
+guardrails:
+  use_nemo: true
+  forbidden_topics:
+    - "risk_gate"
+    - "risk_limits"
+    - "mt5.order_send"
+    - "MetaTrader5"
+
+scope:
+  allowed_files:
+    - "src/trifolium/strategy/v0/predictor.py"
+    - "src/trifolium/strategy/v0/trader.py"
+    - "src/trifolium/strategy/v0/portfolio.py"
+    - "src/trifolium/strategy/config/strategy_v0.yaml"
+    - "config/strategy_v0.yaml"
+  forbidden_paths:
+    - "src/trifolium/risk_gate/"
+    - "config/risk_limits.yaml"
+    - "src/trifolium/strategy/v0/strategy.py"
+
+memory:
+  db_path: "data/strategy_memory.db"
+
+sandbox:
+  base_dir: "sandboxes"

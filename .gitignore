@@ -1,0 +1,13 @@
+.env
+__pycache__/
+*.pyc
+venv/
+.venv/
+logs/
+reports/
+*.egg-info/
+data/
+sandboxes/
+output/
+.playwright-cli/
+pricer-output-*/

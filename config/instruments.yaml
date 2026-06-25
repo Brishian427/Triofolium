@@ -1,0 +1,76 @@
+instruments:
+  - symbol: AUDUSD
+    asset_class: fx
+    expected_contract_size: 100000
+    pip_size: "0.0001"
+    min_lot: "0.01"
+  - symbol: EURCHF
+    asset_class: fx
+    expected_contract_size: 100000
+    pip_size: "0.0001"
+    min_lot: "0.01"
+  - symbol: EURGBP
+    asset_class: fx
+    expected_contract_size: 100000
+    pip_size: "0.0001"
+    min_lot: "0.01"
+  - symbol: EURUSD
+    asset_class: fx
+    expected_contract_size: 100000
+    pip_size: "0.0001"
+    min_lot: "0.01"
+  - symbol: GBPUSD
+    asset_class: fx
+    expected_contract_size: 100000
+    pip_size: "0.0001"
+    min_lot: "0.01"
+  - symbol: USDCAD
+    asset_class: fx
+    expected_contract_size: 100000
+    pip_size: "0.0001"
+    min_lot: "0.01"
+  - symbol: USDCHF
+    asset_class: fx
+    expected_contract_size: 100000
+    pip_size: "0.0001"
+    min_lot: "0.01"
+  - symbol: USDJPY
+    asset_class: fx
+    expected_contract_size: 100000
+    pip_size: "0.01"
+    min_lot: "0.01"
+  - symbol: XAUUSD
+    asset_class: metal
+    expected_contract_size: 100
+    pip_size: "0.01"
+    min_lot: "0.01"
+  - symbol: XAGUSD
+    asset_class: metal
+    expected_contract_size:
+    pip_size: "0.001"
+    min_lot: "0.01"
+  - symbol: BARUSD
+    asset_class: crypto
+    expected_contract_size:
+    pip_size: "0.01"
+    min_lot: "0.01"
+  - symbol: BTCUSD
+    asset_class: crypto
+    expected_contract_size:
+    pip_size: "0.01"
+    min_lot: "0.01"
+  - symbol: ETHUSD
+    asset_class: crypto
+    expected_contract_size:
+    pip_size: "0.01"
+    min_lot: "0.01"
+  - symbol: SOLUSD
+    asset_class: crypto
+    expected_contract_size:
+    pip_size: "0.01"
+    min_lot: "0.01"
+  - symbol: XRPUSD
+    asset_class: crypto
+    expected_contract_size:
+    pip_size: "0.0001"
+    min_lot: "0.01"
