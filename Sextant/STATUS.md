@@ -117,7 +117,7 @@
 - 2026-06-25: Verified Phase H with `python -m compileall src scripts tests`, full `pytest tests -q` result `78 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, test source files contain no `MetaTrader5` literal, and Risk Gate mode remains calibration.
 
 ## In Progress
-- 2026-06-25: L6 runtime readiness remains blocked because Phase H best candidate is classification `b` with non-positive return, `config\risk_limits.yaml` remains `mode: calibration`, and no live bar-feed/order loop has been implemented.
+- 2026-06-25: Phase J live deployment is now principal-approved for `v_fx_only_risk_budgeted_h2_strict`; all 7 hard kills are implemented/verified, H2 strict is wired into live config, `config\risk_limits.yaml` is production, and the live bar-feed/order loop is implemented. Commit and live launch verification are next.
 
 ## Not Started
 - 2026-06-22: Task 01 project code scaffold has not been created because Charter environment assumptions are not fully satisfied.
@@ -156,3 +156,6 @@
 - 2026-06-25: `v_backtest_pass_candidate_i` is not live-ready alpha: its 6-hour gate pass has slightly negative return and D2 decision `KEEP v_N-1`, and its 24-hour sanity check fails Risk Discipline with score `90`.
 - 2026-06-25: `v_conviction_redesign` is binding but not deployable: long-window validation trades actively yet loses money, violates Risk Discipline due concentration penalty, and fails robustness with all six perturbation rows failing Filter 2.
 - 2026-06-25: `v_fx_only_risk_budgeted_h2_strict` fixes risk discipline and robustness but still has no positive edge over the long window; next improvement needs a new alpha architecture, not another risk wrapper.
+- 2026-06-25: Principal has explicitly approved deploying `v_fx_only_risk_budgeted_h2_strict` despite D2 outcome `b`; treat this as an observation-driven live experiment under strict hard-kill controls, not as a positive-alpha D2 acceptance.
+- 2026-06-25: Phase J verification before live launch: `python -m compileall src scripts tests` passed, `python -m pytest tests -q` produced `85 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, and test source files contain no `MetaTrader5` literal.
+- 2026-06-25: Live readiness surfaced an MT5 edge case: with zero open positions MT5 reports `margin_level=0.0`; live hard kill and observability now treat margin-level floors as actionable only when positions are open.

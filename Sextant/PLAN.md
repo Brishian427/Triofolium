@@ -89,6 +89,12 @@
 83. [done 2026-06-25] Create sandbox candidate `v_fx_only_risk_budgeted` from v0-family lessons: FX-only, short lookback, no forced participation, cost gate, and symbol risk budget.
 84. [done 2026-06-25] Run maximum-window D2 validation for `v_fx_only_risk_budgeted` and stricter H2 variant; stop before live because best result is classification `b`, not positive-return deployment candidate.
 85. [done 2026-06-25] Run compile/tests/static MT5 isolation, update Sextant, and commit Phase H result.
+86. [done 2026-06-25] Phase J: principal-approved live deployment of `v_fx_only_risk_budgeted_h2_strict` after implementing and verifying all 7 hard-kill protections.
+87. [done 2026-06-25] Copy H2 strict candidate files into live StrategyV0 config scope without touching `src\trifolium\strategy\v0\strategy.py`.
+88. [done 2026-06-25] Switch `config\risk_limits.yaml` to production only after hard-kill verification is implemented and tests pass.
+89. [in_progress 2026-06-25] Commit before live with the principal-approved H2 deploy message, then launch `scripts\live_run_strategy_v0.py`.
+90. [pending 2026-06-25] Verify live runner startup, hard-kill armed status, session baseline equity, and first-order status; if session gate prevents first order, report honestly instead of bypassing it.
+91. [pending 2026-06-25] Phase K: after J6 live order confirmation only, run sandbox `v_absolute_return` exploration and do not auto-deploy it.
 
 ## Constraints
 - All project continuity state must live under `D:\Desktop\Nucleus\Triofolium\Sextant`.
@@ -120,6 +126,10 @@
 - This tuning round is sandbox-only: do not modify `config\risk_limits.yaml`, do not start `scripts\live_run_strategy_v0.py`, and do not send MT5 orders.
 - Phase G may only proceed toward live if the long-window candidate satisfies outcome (a) and the secondary 24-hour validation keeps Risk Discipline at 100; otherwise stop before production mode.
 - Phase H remains sandbox-only: do not switch Risk Gate production mode, do not launch `scripts\live_run_strategy_v0.py`, and do not send MT5 orders.
+- Principal explicitly overrode the Phase H sandbox-only stop for H2 strict on 2026-06-25; deployment is allowed only for `v_fx_only_risk_budgeted_h2_strict` and only after all 7 hard kills are implemented and verified.
+- H2 strict deployment must preserve the live StrategyV0 interface lock: do not edit `src\trifolium\strategy\v0\strategy.py` during Phase J wiring.
+- Keep H2 strict cost gate, London-morning session gate, FX-only universe, and defensive XAGUSD cap semantics; do not force a first trade outside the allowed session.
+- Phase K exploration must not modify the live H2 strict deployment and must not auto-deploy any absolute-return candidate.
 
 ## Risks
 - 2026-06-22: Task Pool instructions may include ambiguous or high-risk work; pause for confirmation if execution would be destructive or outside the recorded goal.

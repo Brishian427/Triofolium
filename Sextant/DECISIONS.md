@@ -191,3 +191,11 @@
 **Decision:** Preserve the `MT5_CALIBRATION_MODE=1` gate before any L2 live order.
 **Rationale:** Task 01 defines this as the deliberate principal-supervised acknowledgement for a real order.
 **Consequences:** L0/L1 can run with filled `.env`; L2 reports blocked if the gate is absent or not set to `1`.
+
+## 2026-06-25 Principal Override Deploy H2 Strict
+
+**Context:** D2 validation classifies `v_fx_only_risk_budgeted_h2_strict` as outcome `b` because it is robust, risk-clean, and directionally marginal, but has a slightly negative total return after spread cost.
+**Options:** Preserve the D2 no-deploy decision; force a threshold hack to find positive return; accept the principal's explicit 14:45 deployment decision for observing real production behavior.
+**Decision:** Deploy only `v_fx_only_risk_budgeted_h2_strict`, after all 7 live hard-kill conditions are implemented and verified.
+**Rationale:** The principal explicitly approved this candidate as the best honest finding across the candidate set: D2 hard gates pass, robustness is robust, Risk Discipline is 100, MaxDD is tiny, and win rate is marginally positive despite spread drag.
+**Consequences:** The deployment is an observation-driven production experiment, not a D2 alpha acceptance. Risk Gate production mode and the live runner may be enabled only after hard kills pass; Phase K exploration remains sandbox-only and cannot replace the live candidate automatically.

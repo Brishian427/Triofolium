@@ -1,49 +1,47 @@
 name: strategy_v0
-
 tradable_symbols:
-  - EURUSD
-  - GBPUSD
-  - USDJPY
-  - USDCHF
-  - USDCAD
-  - AUDUSD
-  - EURGBP
-  - XAUUSD
-  - XAGUSD
-
+- EURUSD
+- GBPUSD
+- USDJPY
+- USDCHF
+- USDCAD
+- AUDUSD
+- EURGBP
 hard_excluded_symbols:
-  EURCHF: "standing rule: spread too high"
-  BARUSD: "no historical data"
-  BTCUSD: "no historical data"
-  ETHUSD: "no historical data"
-  SOLUSD: "no historical data"
-  XRPUSD: "no historical data"
-
+  EURCHF: 'standing rule: spread too high'
+  BARUSD: no historical data
+  BTCUSD: no historical data
+  ETHUSD: no historical data
+  SOLUSD: no historical data
+  XRPUSD: no historical data
+  XAUUSD: 'Phase H FX-only test: metals removed to isolate FX edge and concentration
+    drag'
+  XAGUSD: 'Phase H FX-only test: metals removed to isolate FX edge and concentration
+    drag'
 bar_interval_minutes: 15
-broker_lot_step: "0.01"
+broker_lot_step: '0.01'
 lot_rounding_decimals: 2
 min_training_samples: 32
-destroyer_validation_sharpe_threshold: "0.0"
-target_rank_center: "0.5"
-
+destroyer_validation_sharpe_threshold: '-1.0'
+target_rank_center: '0.5'
 predictor:
-  ridge_alpha: "1.0"
+  ridge_alpha: '1.0'
   n_bootstraps: 3
-  bootstrap_seeds: [42, 49, 61]
-
+  bootstrap_seeds:
+  - 42
+  - 49
+  - 61
 features:
   lagged_returns:
-    - lag: 1
-    - lag: 5
-    - lag: 20
-    - lag: 96
+  - lag: 1
+  - lag: 5
+  - lag: 20
   volatility:
-    - window: 20
-    - window: 96
+  - window: 20
   cross_symbol:
-    - method: predefined_correlated_pair_1
-    - method: predefined_correlated_pair_2
-    - method: gold_silver_ratio
+  - method: predefined_correlated_pair_1
+  - method: predefined_correlated_pair_2
+  - method: gold_silver_ratio
   gold_silver_ratio_lag: 5
   time_of_day:
     is_london_session:
@@ -58,57 +56,79 @@ features:
   bid_ask:
     current_spread_bps: true
     spread_rolling_mean_window: 20
-    basis_points_multiplier: "10000"
+    basis_points_multiplier: '10000'
   macro:
     dollar_index_proxy_return_lag: 5
-
 correlated_symbols:
-  EURUSD: [GBPUSD, USDCHF]
-  GBPUSD: [EURUSD, EURGBP]
-  USDJPY: [USDCHF, USDCAD]
-  USDCHF: [EURUSD, EURGBP]
-  USDCAD: [USDJPY, USDCHF]
-  AUDUSD: [GBPUSD, USDCAD]
-  EURGBP: [EURUSD, GBPUSD]
-  XAUUSD: [XAGUSD, USDCHF]
-  XAGUSD: [XAUUSD, USDCHF]
-
+  EURUSD:
+  - GBPUSD
+  - USDCHF
+  GBPUSD:
+  - EURUSD
+  - EURGBP
+  USDJPY:
+  - USDCHF
+  - USDCAD
+  USDCHF:
+  - EURUSD
+  - EURGBP
+  USDCAD:
+  - USDJPY
+  - USDCHF
+  AUDUSD:
+  - GBPUSD
+  - USDCAD
+  EURGBP:
+  - EURUSD
+  - GBPUSD
+  XAUUSD:
+  - XAGUSD
+  - USDCHF
+  XAGUSD:
+  - XAUUSD
+  - USDCHF
 trader:
-  sigma_floor: "0.001"
-  sigmoid_scale: "1.5"
+  sigma_floor: '0.001'
+  sigmoid_scale: '1.5'
   top_n: 3
   bottom_n: 3
   sizing_table:
-    - abs_signal_max: "0.2"
-      exposure_pct: "0.0"
-    - abs_signal_max: "0.4"
-      exposure_pct: "1.0"
-    - abs_signal_max: "0.6"
-      exposure_pct: "2.5"
-    - abs_signal_max: "0.8"
-      exposure_pct: "5.0"
-    - abs_signal_max: "1.01"
-      exposure_pct: "10.0"
-
+  - abs_signal_max: '0.05'
+    exposure_pct: '0.0'
+  - abs_signal_max: '0.10'
+    exposure_pct: '0.10'
+  - abs_signal_max: '0.15'
+    exposure_pct: '0.25'
+  - abs_signal_max: '0.25'
+    exposure_pct: '0.50'
+  - abs_signal_max: '1.01'
+    exposure_pct: '1.00'
+  cost_gate_spread_multiplier: '50'
+  cost_gate_min_abs_signal: '0.05'
+  allowed_sessions:
+  - london_morning
+  flatten_disallowed_sessions: true
+  max_lots_by_symbol:
+    XAGUSD: '0.01'
 instrument_contract_size:
-  EURUSD: "100000"
-  GBPUSD: "100000"
-  USDJPY: "100000"
-  USDCHF: "100000"
-  USDCAD: "100000"
-  AUDUSD: "100000"
-  EURGBP: "100000"
-  XAUUSD: "100"
-  XAGUSD: "5000"
-
+  EURUSD: '100000'
+  GBPUSD: '100000'
+  USDJPY: '100000'
+  USDCHF: '100000'
+  USDCAD: '100000'
+  AUDUSD: '100000'
+  EURGBP: '100000'
+  XAUUSD: '100'
+  XAGUSD: '5000'
 portfolio:
-  currency_threshold_pct: "20.0"
-  metals_threshold_pct: "15.0"
-  gross_leverage_threshold: "0.50"
+  currency_threshold_pct: '20.0'
+  metals_threshold_pct: '15.0'
+  gross_leverage_threshold: '0.35'
   scaling_steps: 101
-
+  max_single_symbol_concentration_pct: '35'
+  max_symbol_notional_pct: '5'
 risk_gate:
   required_for_live: true
   production_mode_required: true
   reject_if_legacy_audusd_ticket_open: 46678
-  emergency_flatten_margin_level_pct: "50.0"
+  emergency_flatten_margin_level_pct: '50.0'

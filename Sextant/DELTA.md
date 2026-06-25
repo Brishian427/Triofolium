@@ -2526,6 +2526,20 @@ D:\Desktop\Nucleus\Triofolium\
 **Issues Encountered:** None.
 **Next Session Starting Point:** Read the Task Pool files and execute feasible actions.
 
+## 2026-06-25 Phase J Deploy Start
+
+Time: 2026-06-25
+Title: Principal-approved H2 strict deployment preparation
+Context: Principal explicitly approved live deployment of `v_fx_only_risk_budgeted_h2_strict` despite D2 outcome `b`, contingent on implementing and verifying all 7 hard-kill protections before live launch.
+
+Delta:
+- Recorded the deployment override decision in `Sextant\DECISIONS.md`.
+- Added Phase J/K execution steps and constraints to `Sextant\PLAN.md`.
+- Updated `Sextant\STATUS.md` to show live deployment is now approved but still blocked on hard-kill/live-runner implementation.
+
+Next:
+- Implement 7 hard kills and live bar-feed/order routing before switching Risk Gate to production or launching live.
+
 ### GOAL
 #### Completion Criteria
 - [x] Initialize `Sextant` continuity files under the workspace root.

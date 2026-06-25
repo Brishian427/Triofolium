@@ -15,6 +15,7 @@ from typing import Any
 from trifolium.risk_gate.config import RISK_LIMITS, ROOT, RiskLimits
 from trifolium.risk_gate.state import STATE
 from trifolium.risk_gate.types import AccountSnapshot, PositionSnapshot
+from trifolium.strategy.v0.config import load_strategy_v0_config
 
 
 LOGGER = logging.getLogger("trifolium.risk_gate.observability")
@@ -88,7 +89,7 @@ def build_account_state_record(
     warning_floor = limits.hard_floors.min_margin_level_pct * Decimal("1.2")
     level = "INFO"
     messages: list[str] = []
-    if margin_level is not None and margin_level < warning_floor:
+    if account.open_positions_count > 0 and margin_level is not None and margin_level < warning_floor:
         level = "WARNING"
         messages.append(f"margin_level {margin_level}% within 20% buffer of floor {limits.hard_floors.min_margin_level_pct}%")
     if STATE.locked:
@@ -135,11 +136,12 @@ def get_live_account_snapshot() -> AccountSnapshot:
     from trifolium.adapter.account import get_account_state
 
     state = get_account_state()
+    positions = get_live_positions_snapshot()
     return AccountSnapshot(
         equity=state.equity,
         margin_level_pct=state.margin_level,
         balance=state.balance,
-        open_positions_count=0,
+        open_positions_count=len(positions),
         leverage=Decimal(str(state.leverage)),
     )
 
@@ -149,18 +151,22 @@ def get_live_positions_snapshot() -> list[PositionSnapshot]:
 
     import MetaTrader5 as mt5
 
+    settings = load_strategy_v0_config()
     positions = mt5.positions_get() or []
     snapshots: list[PositionSnapshot] = []
     for position in positions:
         raw = position._asdict() if hasattr(position, "_asdict") else dict(position)
         lots = Decimal(str(raw["volume"]))
         signed_lots = lots if int(raw.get("type", 0)) == 0 else -lots
+        symbol = str(raw["symbol"])
         snapshots.append(
             PositionSnapshot(
-                symbol=str(raw["symbol"]),
+                symbol=symbol,
                 signed_lots=signed_lots,
                 price=Decimal(str(raw["price_current"])),
-                contract_size=Decimal("100000"),
+                contract_size=settings.instrument_contract_size.get(symbol, Decimal("100000")),
+                ticket=int(raw["ticket"]) if raw.get("ticket") is not None else None,
+                unrealized_pnl=Decimal(str(raw["profit"])) if raw.get("profit") is not None else None,
             )
         )
     return snapshots

@@ -20,6 +20,8 @@ class PositionSnapshot(BaseModel):
     signed_lots: Decimal
     price: Decimal
     contract_size: Decimal
+    ticket: int | None = None
+    unrealized_pnl: Decimal | None = None
 
 
 class AccountSnapshot(BaseModel):

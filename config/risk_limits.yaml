@@ -1,6 +1,6 @@
 # Calibration mode (Round 1 remainder) - looser, lets calibration trades through
 # Production mode (Round 2+) - tight defaults below
-mode: calibration  # values: calibration | production
+mode: production  # values: calibration | production
 
 calibration:
   max_lot_per_order: 0.05         # AUDUSD-equivalent. Calibration trades are 0.01.

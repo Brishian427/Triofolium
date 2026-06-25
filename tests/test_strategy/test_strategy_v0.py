@@ -11,8 +11,11 @@ from trifolium.strategy.v0.trader import StrategyV0Trader, compute_signal, cross
 def test_strategy_v0_config_loads() -> None:
     settings = load_strategy_v0_config()
     assert "EURCHF" not in settings.tradable_symbols
-    assert len(settings.tradable_symbols) == 9
+    assert settings.tradable_symbols == ["EURUSD", "GBPUSD", "USDJPY", "USDCHF", "USDCAD", "AUDUSD", "EURGBP"]
+    assert "XAUUSD" not in settings.tradable_symbols
+    assert "XAGUSD" not in settings.tradable_symbols
     assert settings.instrument_contract_size["XAGUSD"] == Decimal("5000")
+    assert settings.trader.max_lots_by_symbol["XAGUSD"] == Decimal("0.01")
 
 
 def test_trader_signal_sizing_and_cross_section() -> None:
@@ -52,9 +55,11 @@ def test_selected_signal_floor_sizes_weak_cross_sectional_picks() -> None:
     settings = load_strategy_v0_config()
     tuned_trader = settings.trader.model_copy(
         update={
-            "selected_signal_floor": Decimal("0.000001"),
-            "top_n": 1,
-            "bottom_n": 1,
+                "selected_signal_floor": Decimal("0.000001"),
+                "cost_gate_spread_multiplier": Decimal("0"),
+                "cost_gate_min_abs_signal": Decimal("0"),
+                "top_n": 1,
+                "bottom_n": 1,
             "sizing_table": [
                 SizingRow(abs_signal_max=Decimal("0.000001"), exposure_pct=Decimal("0.0")),
                 SizingRow(abs_signal_max=Decimal("1.01"), exposure_pct=Decimal("0.25")),
@@ -95,7 +100,13 @@ def test_disabled_symbols_are_forced_flat_by_trader() -> None:
 
 def test_max_lots_by_symbol_caps_target_size() -> None:
     settings = load_strategy_v0_config()
-    tuned_trader = settings.trader.model_copy(update={"max_lots_by_symbol": {"XAGUSD": Decimal("0.01")}})
+    tuned_trader = settings.trader.model_copy(
+        update={
+            "cost_gate_spread_multiplier": Decimal("0"),
+            "cost_gate_min_abs_signal": Decimal("0"),
+            "max_lots_by_symbol": {"XAGUSD": Decimal("0.01")},
+        }
+    )
     tuned = settings.model_copy(update={"trader": tuned_trader})
     trader = StrategyV0Trader(tuned)
     predictions = {symbol: (0.0, 1.0) for symbol in settings.tradable_symbols}
@@ -112,7 +123,15 @@ def test_max_lots_by_symbol_caps_target_size() -> None:
 
 def test_invert_signals_flips_cross_sectional_direction() -> None:
     settings = load_strategy_v0_config()
-    tuned_trader = settings.trader.model_copy(update={"invert_signals": True, "top_n": 1, "bottom_n": 1})
+    tuned_trader = settings.trader.model_copy(
+        update={
+            "cost_gate_spread_multiplier": Decimal("0"),
+            "cost_gate_min_abs_signal": Decimal("0"),
+            "invert_signals": True,
+            "top_n": 1,
+            "bottom_n": 1,
+        }
+    )
     tuned = settings.model_copy(update={"trader": tuned_trader})
     trader = StrategyV0Trader(tuned)
     predictions = {symbol: (0.0, 1.0) for symbol in settings.tradable_symbols}
@@ -173,7 +192,7 @@ def test_portfolio_scaling_caps_single_symbol_concentration() -> None:
 def test_strategy_v0_instantiates_and_stays_flat_without_training() -> None:
     strategy = StrategyV0()
     assert strategy.name == "strategy_v0"
-    assert len(strategy.symbols) == 9
+    assert len(strategy.symbols) == 7
     timestamp = datetime(2026, 1, 1, 0, 15, tzinfo=timezone.utc)
     account = AccountState(balance=Decimal("1000000"), equity=Decimal("1000000"))
     for symbol in strategy.symbols:
