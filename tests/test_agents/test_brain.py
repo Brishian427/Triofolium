@@ -20,7 +20,7 @@ def valid_json() -> str:
         {
             "target_files": ["src/trifolium/strategy/config/strategy_v0.yaml"],
             "element_diff": {"x": {"from": 1, "to": 2}},
-            "rationale": "A narrow threshold change can make the flat strategy produce behavior.",
+            "rationale": "D2 Section 2 shows the Trade Count gate failed, so a narrow threshold change can make the flat strategy produce behavior.",
             "expected_metric_change": {"metric": "trade_count", "direction": "+"},
         }
     )

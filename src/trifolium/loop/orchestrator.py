@@ -75,7 +75,7 @@ class LoopIteration:
             return Path(markdown_path).read_text(encoding="utf-8")
         return json.dumps(metrics, indent=2)
 
-    def _validate_candidate(self, sandbox_dir: Path) -> Any:
+    def _validate_candidate(self, sandbox_dir: Path, *, parent_nickname: str, parent_metrics: dict[str, Any], hypothesis: dict[str, Any]) -> Any:
         cfg = load_backtest_config()
         config_path = sandbox_dir / "src" / "trifolium" / "strategy" / "config" / "strategy_v0.yaml"
         return self.validation_callable(
@@ -85,6 +85,10 @@ class LoopIteration:
             end=cfg.default_start + timedelta(hours=6),
             report_root=sandbox_dir / "reports",
             strategy_config_path=config_path if config_path.exists() else None,
+            parent_nickname=parent_nickname,
+            parent_metrics=parent_metrics,
+            changed_parameters=hypothesis.get("element_diff", {}),
+            evaluation_method="BACKTEST",
         )
 
     def run(self, parent_nickname: str = "v0") -> dict[str, Any]:
@@ -142,7 +146,7 @@ class LoopIteration:
 
             self._log("step5_scope_check", {"passed": True, "sandbox": sandbox_path})
 
-            validation_result = self._validate_candidate(Path(sandbox_path))
+            validation_result = self._validate_candidate(Path(sandbox_path), parent_nickname=parent_nickname, parent_metrics=parent_metrics, hypothesis=hypothesis)
             validation_dict = validation_result.model_dump(mode="json") if hasattr(validation_result, "model_dump") else validation_result
             self._log("step6_backtest", {"result": validation_dict})
 

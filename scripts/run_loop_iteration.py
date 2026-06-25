@@ -32,25 +32,39 @@ def _load_config(path: Path) -> dict[str, Any]:
 
 
 def _latest_v0_metrics() -> dict[str, Any]:
-    preferred = ROOT / "reports" / "validation_strategy_v0_20260625_105114" / "validation_result.json"
-    if preferred.exists():
-        return json.loads(preferred.read_text(encoding="utf-8"))
+    candidates = sorted(
+        (ROOT / "reports").glob("validation_strategy_v0_*/validation_result.json"),
+        key=lambda item: item.stat().st_mtime,
+        reverse=True,
+    )
+    for candidate in candidates:
+        metrics = json.loads(candidate.read_text(encoding="utf-8"))
+        if "d2" in metrics:
+            return metrics
+    if candidates:
+        return json.loads(candidates[0].read_text(encoding="utf-8"))
     return {
         "strategy": "strategy_v0",
-        "passed": True,
+        "passed": False,
         "full_backtest": {"trade_count": 0, "final_equity": "1000000", "total_return": "0"},
     }
 
 
 def seed_v0(memory: StrategyMemory) -> None:
-    if memory.get("v0") is not None:
+    existing = memory.get("v0")
+    if existing is not None:
+        raw_metrics = existing.get("metrics_json")
+        if raw_metrics and "d2" in json.loads(raw_metrics):
+            return
+    metrics = _latest_v0_metrics()
+    if "d2" not in metrics:
         return
     memory.insert(
         nickname="v0",
         element_table=decompose_v0().model_dump(mode="json"),
-        metrics=_latest_v0_metrics(),
+        metrics=metrics,
         decision="BASELINE",
-        rationale="Initial StrategyV0 L5 baseline for Task 05 self-improving loop.",
+        rationale="Initial StrategyV0 D2 baseline for Task 05 self-improving loop.",
         current_rank=0,
         modification_type="baseline",
     )

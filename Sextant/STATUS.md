@@ -1,6 +1,6 @@
 # Project Status
 
-**Last Updated:** 2026-06-25 14:29:41
+**Last Updated:** 2026-06-25 15:04:58
 **Updated By:** Codex
 
 ## Completed
@@ -79,6 +79,12 @@
 - 2026-06-25: Refactored Task 05 Brain to `TieredBrain`: navigator tier defaults to `mistralai/mistral-nemotron`, architect tier uses `nvidia/nemotron-3-super-120b-a12b`, Nano remains fallback, and Ultra is documented as disabled due persistent timeout.
 - 2026-06-25: Re-ran E2E loop iteration `4f00b926`; architect Super fired and produced a valid hypothesis without architect fallback, while Mistral navigator returned DEGRADED/400 and the navigator tier used Nano fallback.
 - 2026-06-25: Verified Architecture 5 with `python -m compileall src scripts tests`, full `pytest tests -q` result `63 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, and test source files contain no `MetaTrader5` literal.
+- 2026-06-25: Verified `src\trifolium\strategy\elements.py` implements the Task 05 Element Periodic Table schema and `decompose_v0()` returns concrete SignalLayer, DecisionLayer, and RiskLayer values rather than a placeholder.
+- 2026-06-25: Implemented D2 9-section evaluation output in `src\trifolium\validation\l5.py`; markdown now emits Sections 1-9 plus Section 10 Engine Diagnostics, and JSON stores all D2 sections under `ValidationResult.d2`.
+- 2026-06-25: Regenerated StrategyV0 D2 baseline `reports\validation_strategy_v0_20260625_140351`; Section 2 correctly rejects v0 because Trade Count is 0 and Active Intervals is 0.
+- 2026-06-25: Updated Brain prompt to consume D2 Sections 2/5/3/4/6 in gate-first order and target Section 2 trade-count failures before secondary metrics.
+- 2026-06-25: Brain-on-D2 smoke produced valid hypothesis JSON with rationale referencing D2 Section 2/5; the valid hypothesis came from safe fallback after Super returned an invalid schema on the first attempt.
+- 2026-06-25: Verified D2 implementation with `python -m pytest tests -q` result `63 passed`; static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, and test source files contain no `MetaTrader5` literal.
 
 ## In Progress
 - 2026-06-25: L6 runtime readiness is intentionally blocked because `config\risk_limits.yaml` remains `mode: calibration`; production mode and any live StrategyV0 start require principal approval.
@@ -113,3 +119,4 @@
 - 2026-06-25: Controlled experiments indicate Ultra 550B is listed but not returning within 300s; recommended 14:00+ mitigation is to switch the Brain model to Super 120B rather than simply increasing Ultra timeout.
 - 2026-06-25: Even after increasing Task 05 Brain timeout to 300s, Ultra 550B still timed out in both E2E and controlled diagnostics; keep Nano fallback active and do not assume Ultra availability for timed demos.
 - 2026-06-25: `mistralai/mistral-nemotron` passed minimal sanity but returned DEGRADED/400 during real navigator E2E; keep Nano fallback active for navigator and be explicit in demos that Mistral is primary-configured but not currently reliable.
+- 2026-06-25: Super architect can still return invalid hypothesis schema on first D2 prompt; keep retry/fallback active and improve prompt/schema pressure during Sonnet patch-fix phase.

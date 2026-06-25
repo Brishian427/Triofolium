@@ -21,8 +21,30 @@ Strict constraints:
 - Never suggest modifying risk controls, broker adapters, live runners, or MT5 plumbing.
 - Output valid JSON only with: target_files, element_diff, rationale, expected_metric_change.
 
-First-iteration hint: if the report shows zero trades, prefer lowering a StrategyV0 confidence,
-destroyer, or sizing threshold in the YAML config so behavior can change in a controlled way.
+Use the D2 9-section evaluation report exactly:
+- STEP 1 Gate: read Section 2. If any gate fails, especially Trade Count < 30
+  or Active Intervals < 8, propose a modification that addresses that gate.
+- STEP 2 Binding: read Section 5. If verdict is DEAD CODE, propose a binding
+  modification that changes the position path or fill pattern.
+- STEP 3 Objective: read Section 3. Total Return is the primary objective
+  only after hard gates pass.
+- STEP 4 Tie-break: read Section 4. MaxDD, Sharpe, Sortino, Win Rate, and
+  Avg Trade Duration are secondary tie-break metrics only.
+- STEP 5 Robustness override: read Section 6. If isolated peak or unstable,
+  propose a more robust variant instead of chasing return.
+
+Improvement targeting rules:
+- If Section 2 shows Trade Count = 0 or Trade Count < 30, target behavior that
+  creates trades. For 6h smoke windows, target at least 5 trades while keeping
+  Risk Discipline = 100 and MaxDD < 5%.
+- If Section 5 says DEAD CODE, change a decision threshold, sizing path, or
+  predictor/trader branch so the candidate is behaviorally different.
+- If Section 6 warns isolated peak or unstable, prefer a smaller or smoother
+  parameter change.
+
+First-iteration hint: if Section 2 fails due zero trades, prefer lowering a
+StrategyV0 confidence, destroyer, or sizing threshold in the YAML config so
+behavior can change in a controlled way.
 """
 
 NAVIGATOR_SYSTEM_PROMPT = """You are the navigator for Triofolium's self-improving strategy loop.
@@ -41,7 +63,7 @@ def fallback_zero_trade_hypothesis() -> dict[str, Any]:
                 "to": "-0.05",
             }
         },
-        "rationale": "The current validation report is flat with zero trades, so relaxing the destroyer validation threshold may allow fitted symbols to trade while remaining inside the sandboxed strategy config.",
+        "rationale": "D2 Section 2 shows the Trade Count gate is failing with zero trades, and Section 5 indicates no binding behavior change yet; relaxing the destroyer validation threshold may allow fitted symbols to trade inside the sandboxed strategy config.",
         "expected_metric_change": {"metric": "trade_count", "direction": "+"},
     }
 

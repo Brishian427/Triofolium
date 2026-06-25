@@ -15,9 +15,35 @@ def test_l5_callable_returns_machine_readable_result(tmp_path):
     )
 
     assert result.strategy == "do_nothing"
-    assert result.passed is True
+    assert result.passed is False
     assert result.filter1.passed is True
     assert result.filter2.passed is True
     assert result.filter3.passed is True
+    assert list(result.d2)[:9] == [
+        "identity",
+        "gate_check",
+        "primary_objective",
+        "secondary_metrics",
+        "binding_check",
+        "robustness",
+        "regime_consistency",
+        "failure_modes_observed",
+        "decision",
+    ]
+    assert result.d2["gate_check"]["passed"] is False
+    assert result.d2["decision"]["verdict"] == "REJECT"
     assert result.markdown_report.endswith("validation_report.md")
     assert result.json_report.endswith("validation_result.json")
+    markdown = __import__("pathlib").Path(result.markdown_report).read_text(encoding="utf-8")
+    expected_headings = [
+        "## Section 1 - Identity",
+        "## Section 2 - Gate Check",
+        "## Section 3 - Primary Objective",
+        "## Section 4 - Secondary Metrics",
+        "## Section 5 - Binding Check",
+        "## Section 6 - Robustness",
+        "## Section 7 - Regime Consistency",
+        "## Section 8 - Failure Modes Observed",
+        "## Section 9 - Decision",
+    ]
+    assert [heading for heading in expected_headings if heading in markdown] == expected_headings

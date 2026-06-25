@@ -67,6 +67,11 @@
 61. [done 2026-06-25] Implement Architecture 5 robust Task 05 Brain: Mistral Nemotron navigator plus Super 120B architect, with Nano as documented local/API fallback.
 62. [done 2026-06-25] Re-run Task 05 tests, static checks, and one E2E iteration proving both TieredBrain tiers fire correctly.
 63. [done 2026-06-25] Commit Architecture 5 robust configuration with the requested commit message.
+64. [done 2026-06-25] Implement D2 9-section validation framework in L5 markdown/JSON and align Brain prompt to the D2 sections before any further deployment work.
+65. [pending 2026-06-25] Fix Sonnet unified diff output/application path, then run 10 D2-formatted self-improving iterations without pausing.
+66. [pending 2026-06-25] Select best candidate only if it meets trade_count, risk discipline, drawdown, and return criteria; otherwise report no-deploy.
+67. [pending 2026-06-25] Strengthen Risk Gate production hard kills including $1000 session cumulative loss from startup equity, then run L6 dry-run readiness.
+68. [pending 2026-06-25] Deploy live only if D2 candidate criteria and Risk Gate hard-kill/readiness checks all pass.
 
 ## Constraints
 - All project continuity state must live under `D:\Desktop\Nucleus\Triofolium\Sextant`.
@@ -91,6 +96,8 @@
 - Task 05 loop must never modify `src\trifolium\risk_gate\`, `config\risk_limits.yaml`, or `src\trifolium\strategy\v0\strategy.py`.
 - Do not print `.env` values; verify only key presence and API outcomes.
 - Do not switch Brain to Super for the demo path; keep Ultra as primary and Nano as the verified fallback unless the principal changes this instruction.
+- Principal has now explicitly approved live deployment, but D2 implementation, 10-iteration candidate selection, and Risk Gate hard-kill verification are mandatory blockers before live.
+- Session loss means cumulative loss from live runner startup equity; at `session_start_equity - 1000`, emergency flatten all positions and halt the loop.
 
 ## Risks
 - 2026-06-22: Task Pool instructions may include ambiguous or high-risk work; pause for confirmation if execution would be destructive or outside the recorded goal.
@@ -131,3 +138,4 @@
 - 2026-06-25: NeMo Guardrails install failed because `annoy` requires Microsoft C++ Build Tools; Pydantic fallback is active.
 - 2026-06-25: NIM Ultra calls can be slow or return 504/timeout; final iteration records the real call attempt and uses the safe fallback hypothesis after timeout.
 - 2026-06-25: Increasing Ultra timeout to 300s can add up to several minutes to one E2E attempt; preserve fail-soft fallback and log whether the real Ultra call or fallback path was used.
+- 2026-06-25: Live deployment is high-risk; if no candidate meets D2 selection criteria or any Risk Gate hard kill is missing/failing, do not deploy despite principal approval.

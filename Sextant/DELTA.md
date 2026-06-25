@@ -2,6 +2,92 @@
 
 Newest entries first. Insert each new round immediately below this title.
 
+## 2026-06-25 15:04:58 - D2 9-Section Evaluation Framework
+
+Time: 2026-06-25 15:04:58
+Title: D2 9-Section Evaluation Framework
+Context: Principal made D2 mandatory before deployment because Brain reasoning quality depends on seeing the correct evaluation framework.
+
+Sextant Details:
+### PLAN
+#### Steps
+64. [done 2026-06-25] Implement D2 9-section validation framework in L5 markdown/JSON and align Brain prompt to the D2 sections before any further deployment work.
+#### Constraints
+[None]
+#### Risks
+[None]
+
+### STATUS
+#### Metadata
+**Last Updated:** 2026-06-25 15:04:58
+#### Completed
+- 2026-06-25: Implemented D2 9-section evaluation output in `src\trifolium\validation\l5.py`; markdown now emits Sections 1-9 plus Section 10 Engine Diagnostics, and JSON stores all D2 sections under `ValidationResult.d2`.
+- 2026-06-25: Regenerated StrategyV0 D2 baseline `reports\validation_strategy_v0_20260625_140351`; Section 2 correctly rejects v0 because Trade Count is 0 and Active Intervals is 0.
+- 2026-06-25: Updated Brain prompt to consume D2 Sections 2/5/3/4/6 in gate-first order and target Section 2 trade-count failures before secondary metrics.
+- 2026-06-25: Brain-on-D2 smoke produced valid hypothesis JSON with rationale referencing D2 Section 2/5; the valid hypothesis came from safe fallback after Super returned an invalid schema on the first attempt.
+- 2026-06-25: Verified D2 implementation with `python -m pytest tests -q` result `63 passed`; static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, and test source files contain no `MetaTrader5` literal.
+#### In Progress
+[None]
+#### Not Started
+[None]
+#### Known Issues
+- 2026-06-25: Super architect can still return invalid hypothesis schema on first D2 prompt; keep retry/fallback active and improve prompt/schema pressure during Sonnet patch-fix phase.
+
+### DECISIONS
+#### [None]
+[None]
+
+### JOURNAL
+#### [None]
+[None]
+
+### GOAL
+#### Completion Criteria
+[None]
+#### Current Focus
+[None]
+
+## 2026-06-25 14:46:13 - D2 Template and Element Table Verification
+
+Time: 2026-06-25 14:46:13
+Title: D2 Template and Element Table Verification
+Context: The principal asked whether the D2 9-section evaluation template and Strategy Element Periodic Table were actually implemented or only described in prior reports.
+
+Sextant Details:
+### PLAN
+#### Steps
+[None]
+#### Constraints
+[None]
+#### Risks
+[None]
+
+### STATUS
+#### Metadata
+**Last Updated:** 2026-06-25 14:46:13
+#### Completed
+- 2026-06-25: Verified `src\trifolium\strategy\elements.py` implements the Task 05 Element Periodic Table schema and `decompose_v0()` returns concrete SignalLayer, DecisionLayer, and RiskLayer values rather than a placeholder.
+#### In Progress
+[None]
+#### Not Started
+[None]
+#### Known Issues
+- 2026-06-25: D2 9-section validation report template is not implemented; current L5 markdown report still uses the original Filter 1/2/3 sections plus plots, despite Task 05 spec mentioning a D2 9-section report.
+
+### DECISIONS
+#### [None]
+[None]
+
+### JOURNAL
+#### [None]
+[None]
+
+### GOAL
+#### Completion Criteria
+[None]
+#### Current Focus
+[None]
+
 ## 2026-06-25 14:29:41 - Architecture 5 Robust Tiered Brain
 
 Time: 2026-06-25 14:29:41
