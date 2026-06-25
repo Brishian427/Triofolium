@@ -22,6 +22,10 @@ class NIMClient:
     DEFAULT_BASE_URL = "https://integrate.api.nvidia.com/v1"
     DEFAULT_TIMEOUT_SECONDS = 300
 
+    @staticmethod
+    def supports_reasoning_budget(model: str) -> bool:
+        return model.startswith("nvidia/nemotron-3-") and "nano" not in model
+
     def __init__(self, api_key: str | None = None, model: str | None = None, base_url: str | None = None) -> None:
         load_dotenv(dotenv_path=ROOT / ".env")
         self.api_key = api_key or os.environ.get("NVIDIA_API_KEY")
@@ -52,7 +56,7 @@ class NIMClient:
         }
         if timeout is not None:
             kwargs["timeout"] = timeout
-        if "nemotron-3-nano" not in selected_model:
+        if self.supports_reasoning_budget(selected_model):
             kwargs["extra_body"] = {
                 "chat_template_kwargs": {"enable_thinking": True},
                 "reasoning_budget": reasoning_budget,

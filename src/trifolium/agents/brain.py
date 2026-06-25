@@ -25,6 +25,12 @@ First-iteration hint: if the report shows zero trades, prefer lowering a Strateg
 destroyer, or sizing threshold in the YAML config so behavior can change in a controlled way.
 """
 
+NAVIGATOR_SYSTEM_PROMPT = """You are the navigator for Triofolium's self-improving strategy loop.
+Choose the next branch direction only. Do not write code or patches.
+Return a concise navigation note with: branch_type, target_area, and why.
+Stay within StrategyV0 sandbox files only.
+"""
+
 
 def fallback_zero_trade_hypothesis() -> dict[str, Any]:
     return {
@@ -40,27 +46,82 @@ def fallback_zero_trade_hypothesis() -> dict[str, Any]:
     }
 
 
-class Brain:
-    """Planner agent that calls NIM and validates JSON hypotheses."""
+class TieredBrain:
+    """Two-tier planner: fast navigator first, stronger architect second."""
+
+    DEFAULT_NAVIGATOR_MODEL = "mistralai/mistral-nemotron"
+    DEFAULT_ARCHITECT_MODEL = "nvidia/nemotron-3-super-120b-a12b"
+    DEFAULT_FALLBACK_MODEL = "nvidia/nemotron-3-nano-30b-a3b"
+    DISABLED_ULTRA_MODEL = "nvidia/nemotron-3-ultra-550b-a55b"
 
     def __init__(
         self,
-        nim_client: NIMClient | None = None,
+        architect_client: NIMClient | None = None,
         *,
+        navigator_client: NIMClient | None = None,
+        navigator_model: str = DEFAULT_NAVIGATOR_MODEL,
+        architect_model: str = DEFAULT_ARCHITECT_MODEL,
+        fallback_model: str = DEFAULT_FALLBACK_MODEL,
         allow_fallback: bool = False,
-        timeout_seconds: float = NIMClient.DEFAULT_TIMEOUT_SECONDS,
+        navigator_timeout_seconds: float = 60,
+        architect_timeout_seconds: float = 60,
         reasoning_budget: int = 8192,
         temperature: float = 0.7,
         max_retries: int = 2,
     ) -> None:
-        self.nim = nim_client or NIMClient()
+        self.navigator_model = navigator_model
+        self.architect_model = architect_model
+        self.fallback_model = fallback_model
+        self.navigator = navigator_client or NIMClient(model=navigator_model)
+        self.architect = architect_client or NIMClient(model=architect_model)
         self.allow_fallback = allow_fallback
-        self.timeout_seconds = timeout_seconds
+        self.navigator_timeout_seconds = navigator_timeout_seconds
+        self.architect_timeout_seconds = architect_timeout_seconds
         self.reasoning_budget = reasoning_budget
         self.temperature = temperature
         self.max_retries = max_retries
         self.last_raw: str | None = None
+        self.last_navigation: str | None = None
         self.last_metadata: dict[str, Any] = {}
+
+    def _navigate(self, user_content: str) -> tuple[str, dict[str, Any]]:
+        try:
+            raw = self.navigator.chat(
+                messages=[
+                    {"role": "system", "content": NAVIGATOR_SYSTEM_PROMPT},
+                    {"role": "user", "content": user_content},
+                ],
+                reasoning_budget=1024,
+                max_tokens=256,
+                temperature=0,
+                timeout=self.navigator_timeout_seconds,
+            )
+            return raw, {
+                "model": self.navigator_model,
+                "real_call": True,
+                "fallback_used": False,
+            }
+        except Exception as exc:
+            if not self.allow_fallback:
+                raise
+            raw = self.navigator.chat(
+                messages=[
+                    {"role": "system", "content": NAVIGATOR_SYSTEM_PROMPT},
+                    {"role": "user", "content": user_content},
+                ],
+                model=self.fallback_model,
+                reasoning_budget=512,
+                max_tokens=256,
+                temperature=0,
+                timeout=self.navigator_timeout_seconds,
+            )
+            return raw, {
+                "model": self.navigator_model,
+                "real_call": True,
+                "fallback_used": True,
+                "fallback_model": self.fallback_model,
+                "error": f"{type(exc).__name__}: {exc}",
+            }
 
     def propose_hypothesis(
         self,
@@ -75,42 +136,88 @@ class Brain:
             f"# Memory of Past Attempts\n\n{memory_summary}\n\n"
             "Propose ONE modification. Output JSON only."
         )
+        try:
+            navigation, navigator_metadata = self._navigate(user_content)
+        except Exception as exc:
+            last_error = f"{type(exc).__name__}: {exc}"
+            self.last_metadata = {
+                "provider": "tiered_nvidia_nim",
+                "real_call": True,
+                "navigator": {
+                    "model": self.navigator_model,
+                    "real_call": True,
+                    "fallback_used": False,
+                    "error": last_error,
+                },
+                "architect": None,
+                "fallback_used": False,
+            }
+            if self.allow_fallback:
+                hypothesis = fallback_zero_trade_hypothesis()
+                self.last_metadata["fallback_used"] = True
+                return True, hypothesis, None
+            return False, None, f"Navigator call failed: {last_error}"
+
+        self.last_navigation = navigation
+        architect_user_content = f"{user_content}\n\n# Navigator Note\n\n{navigation}\n\nReturn architect JSON only."
         last_error = None
         for attempt in range(retry_count + 1):
             try:
-                raw = self.nim.chat(
-                    messages=[{"role": "system", "content": BRAIN_SYSTEM_PROMPT}, {"role": "user", "content": user_content}],
+                raw = self.architect.chat(
+                    messages=[
+                        {"role": "system", "content": BRAIN_SYSTEM_PROMPT},
+                        {"role": "user", "content": architect_user_content},
+                    ],
                     reasoning_budget=self.reasoning_budget,
                     max_tokens=1024,
                     temperature=self.temperature,
-                    timeout=self.timeout_seconds,
+                    timeout=self.architect_timeout_seconds,
                 )
             except Exception as exc:
                 last_error = f"{type(exc).__name__}: {exc}"
                 self.last_metadata = {
-                    "provider": "nvidia_nim",
+                    "provider": "tiered_nvidia_nim",
                     "real_call": True,
-                    "attempt": attempt + 1,
+                    "navigator": navigator_metadata,
+                    "architect": {
+                        "model": self.architect_model,
+                        "real_call": True,
+                        "attempt": attempt + 1,
+                        "fallback_used": False,
+                        "error": last_error,
+                    },
                     "fallback_used": False,
-                    "error": last_error,
                 }
                 if self.allow_fallback:
                     hypothesis = fallback_zero_trade_hypothesis()
                     self.last_metadata["fallback_used"] = True
+                    self.last_metadata["architect"]["fallback_used"] = True
                     return True, hypothesis, None
                 return False, None, f"Brain call failed: {last_error}"
             self.last_raw = raw
-            self.last_metadata = {"provider": "nvidia_nim", "real_call": True, "attempt": attempt + 1, "fallback_used": False}
+            self.last_metadata = {
+                "provider": "tiered_nvidia_nim",
+                "real_call": True,
+                "navigator": navigator_metadata,
+                "architect": {
+                    "model": self.architect_model,
+                    "real_call": True,
+                    "attempt": attempt + 1,
+                    "fallback_used": False,
+                },
+                "fallback_used": False,
+            }
             passed, hypothesis, error = validate_brain_output(raw)
             if passed:
                 return True, hypothesis, None
             last_error = error
-            user_content = f"Previous attempt failed validation: {error}\n\nReturn corrected JSON only."
+            architect_user_content = f"Previous attempt failed validation: {error}\n\nReturn corrected JSON only."
 
         if self.allow_fallback:
             hypothesis = fallback_zero_trade_hypothesis()
             self.last_metadata["fallback_used"] = True
             self.last_metadata["fallback_reason"] = last_error
+            self.last_metadata["architect"]["fallback_used"] = True
             return True, hypothesis, None
         return False, None, f"Brain failed schema validation after {retry_count + 1} attempts: {last_error}"
 
@@ -122,3 +229,6 @@ class Brain:
         if candidate_trades > parent_trades:
             return "ACCEPT", "Candidate increases trade_count while passing validation."
         return "KEEP", "Candidate passes validation but does not improve the primary zero-trade binding yet."
+
+
+Brain = TieredBrain

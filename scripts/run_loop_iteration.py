@@ -19,7 +19,7 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from trifolium.agents.anthropic_client import AnthropicClient
-from trifolium.agents.brain import Brain
+from trifolium.agents.brain import TieredBrain
 from trifolium.agents.coder import Coder
 from trifolium.agents.nim_client import NIMClient
 from trifolium.loop.orchestrator import LoopIteration
@@ -60,12 +60,18 @@ def build_iteration(config: dict[str, Any]) -> LoopIteration:
     load_dotenv(dotenv_path=ROOT / ".env")
     memory = StrategyMemory(ROOT / config["memory"]["db_path"])
     seed_v0(memory)
-    nim = NIMClient(model=config["brain"]["model"])
+    navigator = NIMClient(model=config["brain"]["navigator_model"])
+    architect = NIMClient(model=config["brain"]["architect_model"])
     anthropic = AnthropicClient(model=config["coder"]["model"])
-    brain = Brain(
-        nim,
+    brain = TieredBrain(
+        architect,
+        navigator_client=navigator,
         allow_fallback=True,
-        timeout_seconds=float(config["brain"].get("timeout_seconds", 300)),
+        navigator_model=config["brain"]["navigator_model"],
+        architect_model=config["brain"]["architect_model"],
+        fallback_model=config["brain"].get("fallback_model", "nvidia/nemotron-3-nano-30b-a3b"),
+        navigator_timeout_seconds=float(config["brain"].get("navigator_timeout_seconds", 60)),
+        architect_timeout_seconds=float(config["brain"].get("architect_timeout_seconds", 60)),
         reasoning_budget=int(config["brain"].get("reasoning_budget", 8192)),
         temperature=float(config["brain"].get("temperature", 0.7)),
         max_retries=int(config["brain"].get("max_retries", 2)),

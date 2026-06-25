@@ -1,6 +1,6 @@
 # Project Status
 
-**Last Updated:** 2026-06-25 14:21:21
+**Last Updated:** 2026-06-25 14:29:41
 **Updated By:** Codex
 
 ## Completed
@@ -75,6 +75,10 @@
 - 2026-06-25: Re-ran E2E loop iteration with Ultra 550B at 300s timeout; iteration `ef03fdaa` completed with candidate `v_ef03fdaa`, but Brain still used fallback after `APITimeoutError: Request timed out.`
 - 2026-06-25: Because Ultra still timed out at 300s, re-ran A-D NVIDIA diagnostic and saved `logs\nvidia_diagnostic_20260625_131409.json`; Ultra timed out at 60s and 300s, Super returned HTTP 200 in 2.295s, and Nano returned HTTP 200 in 4.043s with 3399 total tokens.
 - 2026-06-25: Verified timeout fix with `python -m compileall src scripts tests`, full `pytest tests -q` result `62 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, and test source files contain no `MetaTrader5` literal.
+- 2026-06-25: Verified Architecture 5 model identifiers via NVIDIA API: `mistralai/mistral-nemotron` sanity returned HTTP 200, `nvidia/nemotron-3-super-120b-a12b` sanity returned HTTP 200, and Nano fallback `nvidia/nemotron-3-nano-30b-a3b` returned HTTP 200.
+- 2026-06-25: Refactored Task 05 Brain to `TieredBrain`: navigator tier defaults to `mistralai/mistral-nemotron`, architect tier uses `nvidia/nemotron-3-super-120b-a12b`, Nano remains fallback, and Ultra is documented as disabled due persistent timeout.
+- 2026-06-25: Re-ran E2E loop iteration `4f00b926`; architect Super fired and produced a valid hypothesis without architect fallback, while Mistral navigator returned DEGRADED/400 and the navigator tier used Nano fallback.
+- 2026-06-25: Verified Architecture 5 with `python -m compileall src scripts tests`, full `pytest tests -q` result `63 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, and test source files contain no `MetaTrader5` literal.
 
 ## In Progress
 - 2026-06-25: L6 runtime readiness is intentionally blocked because `config\risk_limits.yaml` remains `mode: calibration`; production mode and any live StrategyV0 start require principal approval.
@@ -108,3 +112,4 @@
 - 2026-06-25: Final Task 05 iteration records a real NVIDIA NIM Ultra call attempt, but that call timed out and the loop used the safe fallback hypothesis; Anthropic was also called and then fell back to deterministic safe patch formatting.
 - 2026-06-25: Controlled experiments indicate Ultra 550B is listed but not returning within 300s; recommended 14:00+ mitigation is to switch the Brain model to Super 120B rather than simply increasing Ultra timeout.
 - 2026-06-25: Even after increasing Task 05 Brain timeout to 300s, Ultra 550B still timed out in both E2E and controlled diagnostics; keep Nano fallback active and do not assume Ultra availability for timed demos.
+- 2026-06-25: `mistralai/mistral-nemotron` passed minimal sanity but returned DEGRADED/400 during real navigator E2E; keep Nano fallback active for navigator and be explicit in demos that Mistral is primary-configured but not currently reliable.

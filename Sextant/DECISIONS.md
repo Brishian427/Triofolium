@@ -1,5 +1,13 @@
 # Technical Decision Record
 
+## 2026-06-25 Architecture 5 Robust Tiered Brain
+
+**Context:** Ultra 550B remained unavailable after 300s timeout tests, and the principal requested a robust two-tier Brain architecture for Task 05.
+**Options:** Keep Ultra as primary; use Super for all Brain calls; split navigation and architecture into separate tiers with Mistral Nemotron and Super.
+**Decision:** Refactor Brain to `TieredBrain` with `mistralai/mistral-nemotron` as navigator, `nvidia/nemotron-3-super-120b-a12b` as architect, `nvidia/nemotron-3-nano-30b-a3b` as fallback, and Ultra documented as disabled.
+**Rationale:** This preserves a fast low-stakes navigation tier and a stronger high-stakes architecture tier while avoiding Ultra's persistent timeout failure.
+**Consequences:** Super architect is now the verified working high-stakes model. Mistral passed minimal sanity but degraded during real E2E, so Nano fallback remains necessary for reliable demos.
+
 ## 2026-06-25 Config-Driven NIM Timeout Before Model Switch
 
 **Context:** Ultra 550B timed out during Task 05 E2E at the original 45s Brain timeout, but the principal asked to try a longer Ultra timeout before switching models.

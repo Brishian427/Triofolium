@@ -64,6 +64,9 @@
 58. [done 2026-06-25] Make Task 05 NIM Brain timeout config-driven with 300s default while keeping Ultra 550B as the selected Brain model.
 59. [done 2026-06-25] Re-run one E2E self-improving iteration; Ultra still timed out at 300s, so the controlled A-D diagnostic was rerun and logged.
 60. [done 2026-06-25] Commit `pytest.ini` and the timeout/config fix after tests and the E2E/diagnostic result are logged.
+61. [done 2026-06-25] Implement Architecture 5 robust Task 05 Brain: Mistral Nemotron navigator plus Super 120B architect, with Nano as documented local/API fallback.
+62. [done 2026-06-25] Re-run Task 05 tests, static checks, and one E2E iteration proving both TieredBrain tiers fire correctly.
+63. [done 2026-06-25] Commit Architecture 5 robust configuration with the requested commit message.
 
 ## Constraints
 - All project continuity state must live under `D:\Desktop\Nucleus\Triofolium\Sextant`.

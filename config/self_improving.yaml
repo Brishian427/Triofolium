@@ -5,11 +5,15 @@ loop:
   parent_strategy_default: "v0"
 
 brain:
-  model: "nvidia/nemotron-3-ultra-550b-a55b"
-  fallback_model: "nvidia/nemotron-3-super-120b-a12b"
+  navigator_model: "mistralai/mistral-nemotron"
+  architect_model: "nvidia/nemotron-3-super-120b-a12b"
+  fallback_model: "nvidia/nemotron-3-nano-30b-a3b"
   smoke_model: "nvidia/nemotron-3-nano-30b-a3b"
+  disabled_ultra_model: "nvidia/nemotron-3-ultra-550b-a55b"
+  disabled_ultra_reason: "Persistent APITimeoutError at both 60s and 300s on 2026-06-25 diagnostics."
   reasoning_budget: 8192
-  timeout_seconds: 300
+  navigator_timeout_seconds: 60
+  architect_timeout_seconds: 60
   max_retries: 2
   temperature: 0.7
 

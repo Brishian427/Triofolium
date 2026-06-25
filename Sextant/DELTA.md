@@ -2,6 +2,56 @@
 
 Newest entries first. Insert each new round immediately below this title.
 
+## 2026-06-25 14:29:41 - Architecture 5 Robust Tiered Brain
+
+Time: 2026-06-25 14:29:41
+Title: Architecture 5 Robust Tiered Brain
+Context: The principal requested Architecture 5 robust model routing: Mistral Nemotron for branch navigation, Super 120B for new-branch architecture, Sonnet unchanged, Nano fallback, and Ultra disabled after persistent timeout.
+
+Sextant Details:
+### PLAN
+#### Steps
+61. [done 2026-06-25] Implement Architecture 5 robust Task 05 Brain: Mistral Nemotron navigator plus Super 120B architect, with Nano as documented local/API fallback.
+62. [done 2026-06-25] Re-run Task 05 tests, static checks, and one E2E iteration proving both TieredBrain tiers fire correctly.
+63. [done 2026-06-25] Commit Architecture 5 robust configuration with the requested commit message.
+#### Constraints
+[None]
+#### Risks
+[None]
+
+### STATUS
+#### Metadata
+**Last Updated:** 2026-06-25 14:29:41
+#### Completed
+- 2026-06-25: Verified Architecture 5 model identifiers via NVIDIA API: `mistralai/mistral-nemotron` sanity returned HTTP 200, `nvidia/nemotron-3-super-120b-a12b` sanity returned HTTP 200, and Nano fallback `nvidia/nemotron-3-nano-30b-a3b` returned HTTP 200.
+- 2026-06-25: Refactored Task 05 Brain to `TieredBrain`: navigator tier defaults to `mistralai/mistral-nemotron`, architect tier uses `nvidia/nemotron-3-super-120b-a12b`, Nano remains fallback, and Ultra is documented as disabled due persistent timeout.
+- 2026-06-25: Re-ran E2E loop iteration `4f00b926`; architect Super fired and produced a valid hypothesis without architect fallback, while Mistral navigator returned DEGRADED/400 and the navigator tier used Nano fallback.
+- 2026-06-25: Verified Architecture 5 with `python -m compileall src scripts tests`, full `pytest tests -q` result `63 passed`, static check found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, and test source files contain no `MetaTrader5` literal.
+#### In Progress
+[None]
+#### Not Started
+[None]
+#### Known Issues
+- 2026-06-25: `mistralai/mistral-nemotron` passed minimal sanity but returned DEGRADED/400 during real navigator E2E; keep Nano fallback active for navigator and be explicit in demos that Mistral is primary-configured but not currently reliable.
+
+### DECISIONS
+#### 2026-06-25 Architecture 5 Robust Tiered Brain
+**Context:** Ultra 550B remained unavailable after 300s timeout tests, and the principal requested a robust two-tier Brain architecture for Task 05.
+**Options:** Keep Ultra as primary; use Super for all Brain calls; split navigation and architecture into separate tiers with Mistral Nemotron and Super.
+**Decision:** Refactor Brain to `TieredBrain` with `mistralai/mistral-nemotron` as navigator, `nvidia/nemotron-3-super-120b-a12b` as architect, `nvidia/nemotron-3-nano-30b-a3b` as fallback, and Ultra documented as disabled.
+**Rationale:** This preserves a fast low-stakes navigation tier and a stronger high-stakes architecture tier while avoiding Ultra's persistent timeout failure.
+**Consequences:** Super architect is now the verified working high-stakes model. Mistral passed minimal sanity but degraded during real E2E, so Nano fallback remains necessary for reliable demos.
+
+### JOURNAL
+#### [None]
+[None]
+
+### GOAL
+#### Completion Criteria
+[None]
+#### Current Focus
+[None]
+
 ## 2026-06-25 14:21:21 - Config-Driven Ultra Timeout
 
 Time: 2026-06-25 14:21:21

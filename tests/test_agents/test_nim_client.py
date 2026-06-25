@@ -41,6 +41,14 @@ def test_nim_client_uses_model_and_reasoning(monkeypatch):
     assert "reasoning_budget" in _FakeOpenAI.completions.kwargs["extra_body"]
 
 
+def test_nim_client_skips_reasoning_body_for_mistral(monkeypatch):
+    monkeypatch.setenv("NVIDIA_API_KEY", "test")
+    monkeypatch.setattr(nim_client, "OpenAI", _FakeOpenAI)
+    client = nim_client.NIMClient(model="mistralai/mistral-nemotron")
+    assert client.chat([{"role": "user", "content": "x"}]) == "OK"
+    assert "extra_body" not in _FakeOpenAI.completions.kwargs
+
+
 def test_nim_client_requires_key(monkeypatch):
     monkeypatch.delenv("NVIDIA_API_KEY", raising=False)
     monkeypatch.setattr(nim_client, "ROOT", __import__("pathlib").Path("Z:/definitely_missing"))
