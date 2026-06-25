@@ -109,7 +109,11 @@ trader:
   - ny_afternoon
   - london_afternoon
   - ny_morning
-  flatten_disallowed_sessions: true
+  - off_session
+  - asia
+  # Principal verdict: session labels are documentation/features only.
+  # StrategyV0 runs predictor/trader/cost/portfolio on every bar close.
+  flatten_disallowed_sessions: false
   max_lots_by_symbol:
     XAGUSD: '0.01'
 instrument_contract_size:

@@ -4,6 +4,7 @@ from decimal import Decimal
 from trifolium.backtest.types import AccountState, Bar, Tick
 from trifolium.strategy.v0.config import SizingRow, load_strategy_v0_config
 from trifolium.strategy.v0.portfolio import apply_portfolio_scaling, check_gross_leverage, check_single_symbol_concentration
+from trifolium.strategy.v0.predictor import BarSnapshot
 from trifolium.strategy.v0.strategy import StrategyV0
 from trifolium.strategy.v0.trader import StrategyV0Trader, compute_signal, cross_sectional_filter, exposure_to_lot, passes_cost_gate, signal_to_exposure
 
@@ -29,6 +30,8 @@ def test_strategy_v0_config_loads() -> None:
     assert "london_morning" in settings.trader.allowed_sessions
     assert "london_ny_overlap" in settings.trader.allowed_sessions
     assert "ny_afternoon" in settings.trader.allowed_sessions
+    assert "off_session" in settings.trader.allowed_sessions
+    assert settings.trader.flatten_disallowed_sessions is False
     assert settings.portfolio.max_single_symbol_concentration_pct == Decimal("100")
     assert settings.portfolio.max_symbol_notional_pct == Decimal("5")
 
@@ -226,11 +229,44 @@ def test_strategy_v0_instantiates_and_stays_flat_without_training() -> None:
     assert strategy.on_bar_close(bar, account) == []
 
 
-def test_session_gate_flattens_outside_allowed_sessions() -> None:
-    settings = load_strategy_v0_config()
-    tuned_trader = settings.trader.model_copy(update={"allowed_sessions": ["london_morning"], "flatten_disallowed_sessions": True})
-    tuned = settings.model_copy(update={"trader": tuned_trader})
+def test_off_session_bars_still_reach_trader() -> None:
+    class FakePredictor:
+        has_active_models = True
+        feature_builder = type("FeatureBuilder", (), {"max_lookback": 0})()
 
-    assert StrategyV0._session_name(datetime(2026, 1, 1, 8, tzinfo=timezone.utc)) == "london_morning"
-    assert StrategyV0._session_name(datetime(2026, 1, 1, 18, tzinfo=timezone.utc)) == "ny_afternoon"
-    assert tuned.trader.allowed_sessions == ["london_morning"]
+        def predict_from_bars(self, _bars):
+            return {symbol: (1.0, 0.1) for symbol in strategy.symbols}
+
+    class FakeTrader:
+        def target_lots(self, _predictions, _equity, _prices, spreads=None):
+            return (
+                {symbol: (Decimal("0.01") if symbol == "EURUSD" else Decimal("0")) for symbol in strategy.symbols},
+                {symbol: 1.0 for symbol in strategy.symbols},
+            )
+
+    strategy = StrategyV0()
+    timestamp = datetime(2026, 1, 1, 0, 15, tzinfo=timezone.utc)
+    strategy._predictor = FakePredictor()
+    strategy._trader = FakeTrader()
+    for symbol in strategy.symbols:
+        strategy._bar_history[symbol] = [
+            BarSnapshot(timestamp=timestamp, symbol=symbol, mid=1.0, spread=0.0001)
+        ]
+    account = AccountState(balance=Decimal("1000000"), equity=Decimal("1000000"))
+    for symbol in strategy.symbols:
+        account.latest_ticks[symbol] = Tick(timestamp=timestamp, symbol=symbol, bid=Decimal("1.0"), ask=Decimal("1.0001"))
+    bar = Bar(
+        timestamp=timestamp,
+        symbol="EURUSD",
+        open=Decimal("1.0"),
+        high=Decimal("1.0"),
+        low=Decimal("1.0"),
+        close=Decimal("1.0"),
+        bid=Decimal("1.0"),
+        ask=Decimal("1.0001"),
+    )
+
+    orders = strategy.on_bar_close(bar, account)
+
+    assert len(orders) == 1
+    assert orders[0].symbol == "EURUSD"
