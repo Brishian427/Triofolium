@@ -95,6 +95,7 @@
 89. [done 2026-06-25] Commit before live with the principal-approved H2 deploy message, then launch `scripts\live_run_strategy_v0.py`.
 90. [in_progress 2026-06-25] Verify live runner startup, hard-kill armed status, session baseline equity, and first-order status; live runner is active, but first order is pending because the H2 strict London-morning session gate is currently closed.
 91. [pending 2026-06-25] Phase K: after J6 live order confirmation only, run sandbox `v_absolute_return` exploration and do not auto-deploy it.
+92. [in_progress 2026-06-25] J-prime: principal override relaxes H2 session gate for current-session first-trade verification while preserving Risk Gate hard kills and Phase H controls.
 
 ## Constraints
 - All project continuity state must live under `D:\Desktop\Nucleus\Triofolium\Sextant`.

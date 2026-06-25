@@ -199,3 +199,11 @@
 **Decision:** Deploy only `v_fx_only_risk_budgeted_h2_strict`, after all 7 live hard-kill conditions are implemented and verified.
 **Rationale:** The principal explicitly approved this candidate as the best honest finding across the candidate set: D2 hard gates pass, robustness is robust, Risk Discipline is 100, MaxDD is tiny, and win rate is marginally positive despite spread drag.
 **Consequences:** The deployment is an observation-driven production experiment, not a D2 alpha acceptance. Risk Gate production mode and the live runner may be enabled only after hard kills pass; Phase K exploration remains sandbox-only and cannot replace the live candidate automatically.
+
+## 2026-06-25 Principal Override Relax H2 Session Gate
+
+**Context:** H2 strict live runner started successfully, but J6 first-trade verification remained pending because the deployed config allowed only London morning. The principal clarified that the session gate is attribution-derived optimization, not a safety boundary.
+**Options:** Wait until the next London morning; disable the session gate entirely; expand the session gate while preserving all Risk Gate hard kills and Phase H controls.
+**Decision:** Expand the live session gate to allow current-session trading while leaving the session gate enabled and preserving cost gate, concentration budget, per-symbol caps, and all 7 hard kills.
+**Rationale:** J6 needs a natural first-order verification, and the actual safety boundary is the Risk Gate plus live hard-kill layer, not the attribution-derived session filter.
+**Consequences:** Restart the live runner with the existing session-start equity baseline `999988.39` so the $1000 session-loss tracker is continuous across the config reload. Phase K remains blocked until a real first order is confirmed.

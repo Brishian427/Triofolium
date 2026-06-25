@@ -229,15 +229,30 @@ def hard_kill_armed_status(limits: RiskLimits = RISK_LIMITS) -> dict[str, Any]:
     }
 
 
-def initialize_live_risk_state(account: AccountSnapshot, *, now: datetime | None = None) -> LiveRiskState:
+def initialize_live_risk_state(
+    account: AccountSnapshot,
+    *,
+    session_start_equity: Decimal | None = None,
+    now: datetime | None = None,
+) -> LiveRiskState:
     """Create live risk state and log the session-loss baseline."""
 
-    state = LiveRiskState.from_account(account)
+    if session_start_equity is None:
+        state = LiveRiskState.from_account(account)
+        baseline_source = "account_snapshot"
+    else:
+        state = LiveRiskState(
+            session_start_equity=session_start_equity,
+            session_peak_equity=max(session_start_equity, account.equity),
+        )
+        baseline_source = "cli_override"
     log_strategy_event(
         "live_session_risk_started",
         {
             "session_start_equity": state.session_start_equity,
             "session_loss_floor": state.session_start_equity - SESSION_TOTAL_LOSS_USD,
+            "baseline_source": baseline_source,
+            "account_equity_at_start": account.equity,
             "hard_kills_armed": hard_kill_armed_status(),
         },
         now=now,
@@ -671,6 +686,7 @@ def run_live_loop(
     *,
     sleep_seconds: int = SLEEP_SECONDS,
     warmup_days: int = DEFAULT_WARMUP_DAYS,
+    session_start_equity: Decimal | None = None,
 ) -> None:
     settings = load_strategy_v0_config()
     strategy = StrategyV0()
@@ -678,9 +694,22 @@ def run_live_loop(
     account = get_live_account_snapshot()
     positions = get_live_positions_snapshot()
     account.open_positions_count = len(positions)
-    risk_state = initialize_live_risk_state(account)
+    risk_state = initialize_live_risk_state(account, session_start_equity=session_start_equity)
     warmup_strategy_from_local_bars(strategy, settings, warmup_days=warmup_days)
     bar_aggregator = LiveBarAggregator(minutes=settings.bar_interval_minutes)
+    log_strategy_event(
+        "live_config_loaded",
+        {
+            "allowed_sessions": settings.trader.allowed_sessions,
+            "flatten_disallowed_sessions": settings.trader.flatten_disallowed_sessions,
+            "cost_gate_spread_multiplier": settings.trader.cost_gate_spread_multiplier,
+            "cost_gate_min_abs_signal": settings.trader.cost_gate_min_abs_signal,
+            "max_lots_by_symbol": settings.trader.max_lots_by_symbol,
+            "max_symbol_notional_pct": settings.portfolio.max_symbol_notional_pct,
+            "max_single_symbol_concentration_pct": settings.portfolio.max_single_symbol_concentration_pct,
+            "tradable_symbols": settings.tradable_symbols,
+        },
+    )
     log_strategy_event(
         "strategy_started",
         {
@@ -753,6 +782,12 @@ def main() -> int:
     parser.add_argument("--iterations", type=int, default=None)
     parser.add_argument("--sleep-seconds", type=int, default=SLEEP_SECONDS)
     parser.add_argument("--warmup-days", type=int, default=DEFAULT_WARMUP_DAYS)
+    parser.add_argument(
+        "--session-start-equity",
+        type=Decimal,
+        default=None,
+        help="Preserve the original live-run equity baseline across a supervised restart.",
+    )
     args = parser.parse_args()
 
     from trifolium.adapter.mt5_client import mt5_session
@@ -763,7 +798,12 @@ def main() -> int:
         if not args.live_approved:
             print("live loop not started: pass --live-approved only after principal go-ahead")
             return 0
-        run_live_loop(iterations=args.iterations, sleep_seconds=args.sleep_seconds, warmup_days=args.warmup_days)
+        run_live_loop(
+            iterations=args.iterations,
+            sleep_seconds=args.sleep_seconds,
+            warmup_days=args.warmup_days,
+            session_start_equity=args.session_start_equity,
+        )
     return 0
 
 

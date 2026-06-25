@@ -107,6 +107,10 @@ trader:
   cost_gate_min_abs_signal: '0.05'
   allowed_sessions:
   - london_morning
+  - london_ny_overlap
+  - ny_afternoon
+  - london_afternoon
+  - ny_morning
   flatten_disallowed_sessions: true
   max_lots_by_symbol:
     XAGUSD: '0.01'

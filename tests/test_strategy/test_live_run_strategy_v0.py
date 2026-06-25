@@ -228,6 +228,19 @@ def test_hard_kill_status_lists_per_trade_volume_cap():
     assert status["trade_count_anomaly"]["count"] == 100
 
 
+def test_initialize_live_risk_state_can_preserve_original_baseline(monkeypatch, tmp_path):
+    monkeypatch.setattr(live, "ROOT", tmp_path)
+    account = AccountSnapshot(equity=Decimal("999990"), margin_level_pct=Decimal("0"))
+
+    state = live.initialize_live_risk_state(account, session_start_equity=Decimal("999988.39"))
+
+    assert state.session_start_equity == Decimal("999988.39")
+    assert state.session_peak_equity == Decimal("999990")
+    text = next((tmp_path / "logs").glob("live_run_*.jsonl")).read_text(encoding="utf-8")
+    assert '"baseline_source": "cli_override"' in text
+    assert '"session_loss_floor": "998988.39"' in text
+
+
 def test_strategy_event_logging_writes_jsonl(monkeypatch, tmp_path):
     monkeypatch.setattr(live, "ROOT", tmp_path)
     path = live.log_strategy_event("prediction", {"symbol": "EURUSD", "signal": Decimal("0.1")})

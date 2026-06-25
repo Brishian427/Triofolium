@@ -16,6 +16,9 @@ def test_strategy_v0_config_loads() -> None:
     assert "XAGUSD" not in settings.tradable_symbols
     assert settings.instrument_contract_size["XAGUSD"] == Decimal("5000")
     assert settings.trader.max_lots_by_symbol["XAGUSD"] == Decimal("0.01")
+    assert "london_morning" in settings.trader.allowed_sessions
+    assert "london_ny_overlap" in settings.trader.allowed_sessions
+    assert "ny_afternoon" in settings.trader.allowed_sessions
 
 
 def test_trader_signal_sizing_and_cross_section() -> None:
