@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 from trifolium.backtest.types import AccountState, Bar, Tick
@@ -227,6 +227,26 @@ def test_strategy_v0_instantiates_and_stays_flat_without_training() -> None:
     )
     assert strategy.on_tick(account.latest_ticks["EURUSD"], account) == []
     assert strategy.on_bar_close(bar, account) == []
+
+
+def test_recent_prediction_history_keeps_alignment_buffer() -> None:
+    strategy = StrategyV0()
+    max_lookback = strategy._predictor.feature_builder.max_lookback
+    timestamp = datetime(2026, 1, 1, 0, tzinfo=timezone.utc)
+    for symbol in strategy.symbols:
+        strategy._bar_history[symbol] = [
+            BarSnapshot(
+                timestamp=timestamp + timedelta(minutes=15 * index),
+                symbol=symbol,
+                mid=1.0 + index * 0.0001,
+                spread=0.0001,
+            )
+            for index in range(max_lookback * 4)
+        ]
+
+    recent = strategy._recent_prediction_history()
+
+    assert all(len(bars) >= max_lookback * 3 for bars in recent.values())
 
 
 def test_off_session_bars_still_reach_trader() -> None:

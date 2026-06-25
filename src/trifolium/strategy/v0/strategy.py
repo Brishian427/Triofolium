@@ -120,7 +120,7 @@ class StrategyV0(Strategy):
         return bool(self._bar_history.get(symbol)) and self._bar_history[symbol][-1].timestamp == timestamp
 
     def _recent_prediction_history(self) -> dict[str, list[BarSnapshot]]:
-        lookback = self._predictor.feature_builder.max_lookback + 2
+        lookback = max(self._predictor.feature_builder.max_lookback + 2, self._predictor.feature_builder.max_lookback * 3)
         return {symbol: bars[-lookback:] for symbol, bars in self._bar_history.items()}
 
     def _orders_from_targets(self, target_lots: dict[str, Decimal], state: AccountState) -> list[Order]:
