@@ -223,3 +223,11 @@
 **Decision:** In `check_account_health`, treat `margin_level_pct == 0` with `open_positions_count == 0` as healthy if equity is positive.
 **Rationale:** The hard margin floor protects accounts with active margin exposure. A flat account with no margin used cannot breach margin level in the same sense, and projected exposure is separately checked by Risk Gate leverage and lot caps.
 **Consequences:** First opening orders can proceed to later checks and MT5 execution, while low-margin accounts with open positions still fail closed.
+
+## 2026-06-25 Principal Override Restore Metals and Raise FX Lot Cap
+
+**Context:** FX-only H2 was an over-reaction to Phase H attribution. After concentration was disabled, live targets still showed conviction that could be blocked by the `0.1` per-order cap, while metals were excluded from signal competition entirely.
+**Options:** Keep FX-only and cap `0.1`; restore metals but keep the cap; restore metals and raise the generic cap while preserving metal-specific caps.
+**Decision:** Restore XAUUSD and XAGUSD to the live StrategyV0 tradable universe, raise the generic production per-order lot cap to `0.3`, keep XAGUSD capped at `0.01`, and cap XAUUSD at `0.1`.
+**Rationale:** The principal judged cost gate and signal strength as the appropriate opportunity selectors, with hard kills as the safety boundary. XAGUSD still needs a per-symbol cap due contract-size risk; XAUUSD remains bounded separately from the generic FX cap.
+**Consequences:** Live StrategyV0 now evaluates 9 symbols. AUDUSD-sized conviction trades up to `0.3` lots can pass Risk Gate, while XAGUSD and XAUUSD remain limited by symbol overrides.

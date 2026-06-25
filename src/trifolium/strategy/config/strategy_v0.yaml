@@ -7,6 +7,8 @@ tradable_symbols:
 - USDCAD
 - AUDUSD
 - EURGBP
+- XAUUSD
+- XAGUSD
 hard_excluded_symbols:
   EURCHF: 'standing rule: spread too high'
   BARUSD: no historical data
@@ -14,10 +16,6 @@ hard_excluded_symbols:
   ETHUSD: no historical data
   SOLUSD: no historical data
   XRPUSD: no historical data
-  XAUUSD: 'Phase H FX-only test: metals removed to isolate FX edge and concentration
-    drag'
-  XAGUSD: 'Phase H FX-only test: metals removed to isolate FX edge and concentration
-    drag'
 bar_interval_minutes: 15
 broker_lot_step: '0.01'
 lot_rounding_decimals: 2

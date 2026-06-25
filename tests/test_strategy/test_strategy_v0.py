@@ -11,9 +11,19 @@ from trifolium.strategy.v0.trader import StrategyV0Trader, compute_signal, cross
 def test_strategy_v0_config_loads() -> None:
     settings = load_strategy_v0_config()
     assert "EURCHF" not in settings.tradable_symbols
-    assert settings.tradable_symbols == ["EURUSD", "GBPUSD", "USDJPY", "USDCHF", "USDCAD", "AUDUSD", "EURGBP"]
-    assert "XAUUSD" not in settings.tradable_symbols
-    assert "XAGUSD" not in settings.tradable_symbols
+    assert settings.tradable_symbols == [
+        "EURUSD",
+        "GBPUSD",
+        "USDJPY",
+        "USDCHF",
+        "USDCAD",
+        "AUDUSD",
+        "EURGBP",
+        "XAUUSD",
+        "XAGUSD",
+    ]
+    assert "XAUUSD" not in settings.hard_excluded_symbols
+    assert "XAGUSD" not in settings.hard_excluded_symbols
     assert settings.instrument_contract_size["XAGUSD"] == Decimal("5000")
     assert settings.trader.max_lots_by_symbol["XAGUSD"] == Decimal("0.01")
     assert "london_morning" in settings.trader.allowed_sessions
@@ -197,7 +207,7 @@ def test_portfolio_scaling_caps_single_symbol_concentration() -> None:
 def test_strategy_v0_instantiates_and_stays_flat_without_training() -> None:
     strategy = StrategyV0()
     assert strategy.name == "strategy_v0"
-    assert len(strategy.symbols) == 7
+    assert len(strategy.symbols) == 9
     timestamp = datetime(2026, 1, 1, 0, 15, tzinfo=timezone.utc)
     account = AccountState(balance=Decimal("1000000"), equity=Decimal("1000000"))
     for symbol in strategy.symbols:

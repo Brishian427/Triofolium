@@ -98,6 +98,7 @@
 92. [blocked 2026-06-25] J-prime: principal override relaxed H2 session gate and live runner was restarted with original baseline, but first-trade verification remains blocked because portfolio concentration budgeting zeroed current two-symbol targets before Risk Gate submission.
 93. [in_progress 2026-06-25] J-triple-prime: principal verdict disables the StrategyV0 single-symbol concentration gate, preserves Risk Gate hard kills and original session baseline, then restarts live runner for first-order verification.
 94. [in_progress 2026-06-25] J-triple-prime follow-up: align Risk Gate account-health semantics with MT5 flat-account `margin_level=0.0`, then restart live runner again with the original session baseline.
+95. [in_progress 2026-06-25] Principal override: restore XAUUSD/XAGUSD to the live StrategyV0 universe, raise the generic production lot cap to `0.3`, keep XAGUSD capped at `0.01`, keep XAUUSD capped at `0.1`, and restart the live runner with the original session baseline.
 
 ## Constraints
 - All project continuity state must live under `D:\Desktop\Nucleus\Triofolium\Sextant`.
@@ -134,6 +135,7 @@
 - Keep H2 strict cost gate, London-morning session gate, FX-only universe, and defensive XAGUSD cap semantics; do not force a first trade outside the allowed session.
 - Phase K exploration must not modify the live H2 strict deployment and must not auto-deploy any absolute-return candidate.
 - J-triple-prime may disable only the StrategyV0 single-symbol concentration gate; do not weaken Risk Gate hard kills, the $1000 session-loss floor, cost gate, session gate, FX-only universe, or XAGUSD per-symbol cap.
+- Metals restore override supersedes the prior FX-only universe constraint; hard kills, session-loss floor, cost gate, session gate, XAGUSD cap, and XAUUSD cap remain active.
 
 ## Risks
 - 2026-06-22: Task Pool instructions may include ambiguous or high-risk work; pause for confirmation if execution would be destructive or outside the recorded goal.
