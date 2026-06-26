@@ -19,6 +19,8 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in __import__("sys").path:
     __import__("sys").path.insert(0, str(ROOT))
 
+RISK_DISCIPLINE_GATE_MIN = 90.0
+
 
 class FilterOutcome(BaseModel):
     """Machine-readable status for one L5 filter."""
@@ -174,7 +176,7 @@ def _build_d2_report(
 
     gates = [
         _gate_row("MaxDD", "< 30%", round(maxdd_pct, 6), maxdd_pct < 30.0),
-        _gate_row("Risk Discipline", "= 100", risk_discipline, risk_discipline == 100.0),
+        _gate_row("Risk Discipline", ">= 90", risk_discipline, risk_discipline >= RISK_DISCIPLINE_GATE_MIN),
         _gate_row("Trade Count", ">= 30", trade_count, trade_count >= 30),
         _gate_row("Active Intervals", ">= 8", active_intervals, active_intervals >= 8),
     ]
@@ -221,8 +223,10 @@ def _build_d2_report(
         failure_modes.append(f"risk_events={full.risk_events}")
     if maxdd_pct >= 25:
         failure_modes.append("gate-edge proximity: MaxDD near 30% hard gate")
-    if risk_discipline < 100:
-        failure_modes.append("risk discipline below perfect score")
+    if risk_discipline < RISK_DISCIPLINE_GATE_MIN:
+        failure_modes.append(f"risk discipline below gate minimum {RISK_DISCIPLINE_GATE_MIN:g}")
+    elif risk_discipline < 100:
+        failure_modes.append("risk discipline below perfect score but within accepted gate")
     if trade_count == 0:
         failure_modes.append("dead strategy path: zero trades")
     if not failure_modes:

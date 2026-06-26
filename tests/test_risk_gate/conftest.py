@@ -29,7 +29,7 @@ def account() -> AccountSnapshot:
 def make_request(account: AccountSnapshot):
     def _make_request(**overrides: object) -> OrderRequest:
         data = {
-            "symbol": "AUDUSD",
+            "symbol": "GBPUSD",
             "side": "buy",
             "lots": Decimal("0.01"),
             "price": Decimal("0.7000"),

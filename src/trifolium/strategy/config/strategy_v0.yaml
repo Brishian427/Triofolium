@@ -115,6 +115,8 @@ trader:
   # StrategyV0 runs predictor/trader/cost/portfolio on every bar close.
   flatten_disallowed_sessions: false
   max_lots_by_symbol:
+    USDCAD: '0.5'
+    USDJPY: '0.5'
     XAGUSD: '0.01'
 instrument_contract_size:
   EURUSD: '100000'

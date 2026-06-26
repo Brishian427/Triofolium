@@ -31,3 +31,40 @@ def test_total_leverage_rejects_existing_high_leverage(make_request, production_
     passed, reason = check_total_leverage(request, production_limits)
     assert not passed
     assert "check_total_leverage" in reason
+
+
+def test_total_leverage_allows_usdjpy_without_quote_multiplier(make_request, production_limits) -> None:
+    account = make_request().account.model_copy(update={"equity": Decimal("1000000")})
+    request = make_request(
+        symbol="USDJPY",
+        lots=Decimal("0.5"),
+        price=Decimal("161.824"),
+        contract_size=Decimal("100000"),
+        strategy_notional=Decimal("50000"),
+        account=account,
+    )
+
+    passed, reason = check_total_leverage(request, production_limits)
+
+    assert passed
+    assert reason is None
+
+
+def test_total_leverage_allows_reducing_existing_position(make_request, production_limits, position_factory) -> None:
+    account = make_request().account.model_copy(update={"equity": Decimal("10000")})
+    existing = [position_factory("GBPUSD", "-0.5", "1.32", "100000")]
+    request = make_request(
+        symbol="GBPUSD",
+        side="buy",
+        lots=Decimal("0.5"),
+        price=Decimal("1.32"),
+        contract_size=Decimal("100000"),
+        strategy_notional=Decimal("66000"),
+        account=account,
+        existing_positions=existing,
+    )
+
+    passed, reason = check_total_leverage(request, production_limits)
+
+    assert passed
+    assert reason is None

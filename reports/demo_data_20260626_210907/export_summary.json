@@ -1,0 +1,145 @@
+{
+  "end_utc": "2026-06-26T21:09:07.800866+00:00",
+  "logs": {
+    "account_state_rows": 49566,
+    "event_counts_top": [
+      [
+        "entry_waiting_for_retrace",
+        210438
+      ],
+      [
+        "heartbeat",
+        49095
+      ],
+      [
+        "target_skipped_unmanaged_position",
+        6922
+      ],
+      [
+        "hard_kills_disabled_for_manual_trade_protection",
+        5003
+      ],
+      [
+        "entry_order_result",
+        2270
+      ],
+      [
+        "take_profit_order_result",
+        248
+      ],
+      [
+        "take_profit_triggered",
+        248
+      ],
+      [
+        "profit_harvester_started",
+        169
+      ],
+      [
+        "harvester_restart",
+        157
+      ],
+      [
+        "reconcile_opposite_order_result",
+        111
+      ],
+      [
+        "target_reconciled_opposite_position",
+        111
+      ],
+      [
+        "profit_harvester_halted",
+        48
+      ]
+    ],
+    "log_files_count": 834,
+    "profit_harvester_key_events": 14860,
+    "raw_logs_zip": "D:\\Desktop\\Nucleus\\Triofolium\\reports\\demo_data_20260626_210907\\raw_logs.zip",
+    "raw_logs_zip_size_bytes": 5759384,
+    "risk_gate_decisions": 12619
+  },
+  "mt5": {
+    "account": {
+      "assets": 0.0,
+      "balance": 998491.78,
+      "commission_blocked": 0.0,
+      "company": "FT Worldwide Investments Limited",
+      "credit": 0.0,
+      "currency": "USD",
+      "currency_digits": 2,
+      "equity": 985764.88,
+      "fifo_close": false,
+      "leverage": 30,
+      "liabilities": 0.0,
+      "limit_orders": 0,
+      "login": 10181,
+      "margin": 87719.59,
+      "margin_free": 898045.29,
+      "margin_initial": 0.0,
+      "margin_level": 1123.768225546882,
+      "margin_maintenance": 0.0,
+      "margin_mode": 0,
+      "margin_so_call": 50.0,
+      "margin_so_mode": 0,
+      "margin_so_so": 0.0,
+      "name": "10181",
+      "profit": -12726.9,
+      "server": "FTWorldwide-MainTrade",
+      "trade_allowed": true,
+      "trade_expert": true,
+      "trade_mode": 2
+    },
+    "close_deals_with_nonzero_profit": 161,
+    "deals_count": 334,
+    "open_positions_count": 2,
+    "orders_count": 325,
+    "realized_pnl_by_magic_comment": [
+      {
+        "comment": "",
+        "magic": "0",
+        "realized_pnl": -266.97
+      },
+      {
+        "comment": "strategy_v0_emer",
+        "magic": "10181",
+        "realized_pnl": -202.64
+      },
+      {
+        "comment": "harv_reconcile",
+        "magic": "10181",
+        "realized_pnl": -112.89
+      },
+      {
+        "comment": "profit_harvester",
+        "magic": "10181",
+        "realized_pnl": 494.98
+      }
+    ],
+    "terminal": {
+      "build": 5836,
+      "codepage": 0,
+      "commondata_path": "C:\\Users\\LENOVO\\AppData\\Roaming\\MetaQuotes\\Terminal\\Common",
+      "community_account": false,
+      "community_balance": 0.0,
+      "community_connection": false,
+      "company": "MetaQuotes Ltd.",
+      "connected": true,
+      "data_path": "C:\\Users\\LENOVO\\AppData\\Roaming\\MetaQuotes\\Terminal\\D0E8209F77C8CF37AD8BF550E51FF075",
+      "dlls_allowed": true,
+      "email_enabled": false,
+      "ftp_enabled": false,
+      "language": "English",
+      "maxbars": 100000,
+      "mqid": false,
+      "name": "MetaTrader 5",
+      "notifications_enabled": false,
+      "path": "C:\\Program Files\\MetaTrader 5",
+      "ping_last": 0,
+      "retransmission": 10.687902118038018,
+      "trade_allowed": true,
+      "tradeapi_disabled": false
+    }
+  },
+  "output_dir": "D:\\Desktop\\Nucleus\\Triofolium\\reports\\demo_data_20260626_210907",
+  "start_utc": "2026-06-22T00:00:00+00:00"
+}

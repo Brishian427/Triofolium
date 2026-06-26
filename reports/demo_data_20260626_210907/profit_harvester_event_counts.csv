@@ -1,0 +1,13 @@
+event,count
+entry_waiting_for_retrace,210438
+heartbeat,49095
+target_skipped_unmanaged_position,6922
+hard_kills_disabled_for_manual_trade_protection,5003
+entry_order_result,2270
+take_profit_order_result,248
+take_profit_triggered,248
+profit_harvester_started,169
+harvester_restart,157
+reconcile_opposite_order_result,111
+target_reconciled_opposite_position,111
+profit_harvester_halted,48

@@ -1,0 +1,30 @@
+take_profit_usd: "5"
+poll_seconds: 1
+cooldown_seconds: 300
+session_total_loss_usd: "1000"
+
+targets:
+  - symbol: USDJPY
+    side: buy
+    lots: "0.5"
+    reentry_retrace_price: "0.03"
+  - symbol: USDCHF
+    side: buy
+    lots: "0.5"
+    reentry_retrace_price: "0.0003"
+  - symbol: XAUUSD
+    side: buy
+    lots: "0.1"
+    reentry_retrace_price: "0.50"
+  - symbol: AUDUSD
+    side: sell
+    lots: "0.5"
+    reentry_retrace_price: "0.0003"
+  - symbol: EURUSD
+    side: sell
+    lots: "0.5"
+    reentry_retrace_price: "0.0003"
+  - symbol: GBPUSD
+    side: buy
+    lots: "0.5"
+    reentry_retrace_price: "0.0003"

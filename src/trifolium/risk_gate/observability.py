@@ -167,6 +167,8 @@ def get_live_positions_snapshot() -> list[PositionSnapshot]:
                 contract_size=settings.instrument_contract_size.get(symbol, Decimal("100000")),
                 ticket=int(raw["ticket"]) if raw.get("ticket") is not None else None,
                 unrealized_pnl=Decimal(str(raw["profit"])) if raw.get("profit") is not None else None,
+                comment=str(raw["comment"]) if raw.get("comment") is not None else None,
+                magic=int(raw["magic"]) if raw.get("magic") is not None else None,
             )
         )
     return snapshots

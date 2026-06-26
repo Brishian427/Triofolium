@@ -92,7 +92,7 @@ def test_single_instrument_loss_closes_only_that_symbol(monkeypatch, tmp_path):
             signed_lots=Decimal("0.01"),
             price=Decimal("1.10"),
             contract_size=Decimal("100000"),
-            unrealized_pnl=Decimal("-201"),
+            unrealized_pnl=Decimal("-501"),
         ),
         PositionSnapshot(
             symbol="GBPUSD",
@@ -220,11 +220,80 @@ def test_trade_count_anomaly_flattens_all_and_halts(monkeypatch, tmp_path):
     assert len(seen) == 1
 
 
+def test_take_profit_closes_position_at_five_dollars(monkeypatch, tmp_path):
+    monkeypatch.setattr(live, "ROOT", tmp_path)
+    account = AccountSnapshot(equity=Decimal("1000005"), margin_level_pct=Decimal("500"))
+    position = PositionSnapshot(
+        symbol="USDCAD",
+        signed_lots=Decimal("0.10"),
+        price=Decimal("1.35"),
+        contract_size=Decimal("100000"),
+        ticket=123,
+        unrealized_pnl=Decimal("5"),
+    )
+    seen: list[OrderRequest] = []
+
+    def submitter(request: OrderRequest) -> OrderResult:
+        seen.append(request)
+        return OrderResult(status="submitted", request=request)
+
+    results = live.close_take_profit_positions([position], account, submitter=submitter)
+
+    assert len(results) == 1
+    assert seen[0].symbol == "USDCAD"
+    assert seen[0].side == "sell"
+    assert seen[0].lots == Decimal("0.10")
+    assert seen[0].comment == "strategy_v0_take_profit"
+
+
+def test_take_profit_ignores_positions_below_threshold(monkeypatch, tmp_path):
+    monkeypatch.setattr(live, "ROOT", tmp_path)
+    account = AccountSnapshot(equity=Decimal("1000004.99"), margin_level_pct=Decimal("500"))
+    position = PositionSnapshot(
+        symbol="USDCAD",
+        signed_lots=Decimal("0.10"),
+        price=Decimal("1.35"),
+        contract_size=Decimal("100000"),
+        unrealized_pnl=Decimal("4.99"),
+    )
+    seen: list[OrderRequest] = []
+
+    def submitter(request: OrderRequest) -> OrderResult:
+        seen.append(request)
+        return OrderResult(status="submitted", request=request)
+
+    assert live.close_take_profit_positions([position], account, submitter=submitter) == []
+    assert seen == []
+
+
+def test_take_profit_splits_close_orders_by_symbol_cap(monkeypatch, tmp_path):
+    monkeypatch.setattr(live, "ROOT", tmp_path)
+    account = AccountSnapshot(equity=Decimal("1000010"), margin_level_pct=Decimal("500"))
+    position = PositionSnapshot(
+        symbol="USDCAD",
+        signed_lots=Decimal("1.10"),
+        price=Decimal("1.35"),
+        contract_size=Decimal("100000"),
+        unrealized_pnl=Decimal("10"),
+    )
+    seen: list[OrderRequest] = []
+
+    def submitter(request: OrderRequest) -> OrderResult:
+        seen.append(request)
+        return OrderResult(status="submitted", request=request)
+
+    live.close_take_profit_positions([position], account, submitter=submitter)
+
+    assert [request.lots for request in seen] == [Decimal("0.5"), Decimal("0.5"), Decimal("0.10")]
+    assert all(request.side == "sell" for request in seen)
+
+
 def test_hard_kill_status_lists_per_trade_volume_cap():
     limits = _limits("production")
     status = live.hard_kill_armed_status(limits)
 
     assert status["per_trade_volume_cap"] == Decimal("0.01")
+    assert status["per_position_take_profit_usd"] == Decimal("5")
     assert status["trade_count_anomaly"]["count"] == 100
 
 

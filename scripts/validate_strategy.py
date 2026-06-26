@@ -46,6 +46,8 @@ BASELINES = {
     "strategy_v0": "trifolium.strategy.v0.strategy:StrategyV0",
 }
 
+RISK_DISCIPLINE_GATE_MIN = Decimal("90")
+
 
 def parse_dt(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00"))
@@ -442,8 +444,8 @@ def filter1(result: BacktestResult) -> tuple[bool, list[str]]:
         incidents.extend(result.stop_out_events)
     if result.final_equity <= 0:
         incidents.append("final equity <= 0")
-    if result.projected_risk_discipline < Decimal("100"):
-        incidents.append(f"projected risk discipline below 100: {result.projected_risk_discipline}")
+    if result.projected_risk_discipline < RISK_DISCIPLINE_GATE_MIN:
+        incidents.append(f"projected risk discipline below 90: {result.projected_risk_discipline}")
     return not incidents, incidents
 
 

@@ -70,3 +70,21 @@ def test_brain_returns_error_when_invalid():
     assert passed is False
     assert hypothesis is None
     assert "failed" in error
+
+
+def test_evaluate_candidate_uses_d2_decision_reason():
+    brain = TieredBrain(FakeNIM([]), navigator_client=FakeNIM([]))
+    decision, rationale = brain.evaluate_candidate(
+        {"full_backtest": {"trade_count": 0}},
+        {
+            "passed": False,
+            "d2": {
+                "decision": {
+                    "verdict": "KEEP v_N-1",
+                    "reason": "Candidate passed gates but failed robustness sweep.",
+                }
+            },
+        },
+    )
+    assert decision == "KEEP"
+    assert rationale == "Candidate passed gates but failed robustness sweep."

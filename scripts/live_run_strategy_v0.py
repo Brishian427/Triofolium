@@ -27,6 +27,7 @@ from trifolium.backtest.config import load_backtest_config
 from trifolium.backtest.types import AccountState as StrategyAccountState
 from trifolium.backtest.types import Bar, Order, Position, Tick
 from trifolium.risk_gate.config import RISK_LIMITS, RiskLimits
+from trifolium.risk_gate.checks.numeric_consistency import estimate_account_notional
 from trifolium.risk_gate.gate import submit_order
 from trifolium.risk_gate.observability import get_live_account_snapshot, get_live_positions_snapshot, log_account_state
 from trifolium.risk_gate.types import AccountSnapshot, OrderRequest, OrderResult, PositionSnapshot
@@ -36,9 +37,11 @@ from trifolium.strategy.v0.strategy import StrategyV0
 
 LEGACY_AUDUSD_TICKET = 46678
 EMERGENCY_MARGIN_LEVEL_PCT = Decimal("50")
-SINGLE_INSTRUMENT_UNREALIZED_FLOOR = Decimal("-200")
+SINGLE_INSTRUMENT_UNREALIZED_FLOOR = Decimal("-500")
 TOTAL_UNREALIZED_FLOOR = Decimal("-500")
 SESSION_TOTAL_LOSS_USD = Decimal("1000")
+TAKE_PROFIT_USD = Decimal("5")
+PROFIT_SENTINEL_POLL_SECONDS = Decimal("1")
 TRADE_ANOMALY_COUNT = 100
 TRADE_ANOMALY_WINDOW = timedelta(minutes=30)
 SESSION_DRAWDOWN_PCT = Decimal("5")
@@ -222,6 +225,8 @@ def hard_kill_armed_status(limits: RiskLimits = RISK_LIMITS) -> dict[str, Any]:
             symbol: override.max_lot_per_order for symbol, override in limits.symbol_overrides.items()
         },
         "session_total_loss_usd": SESSION_TOTAL_LOSS_USD,
+        "per_position_take_profit_usd": TAKE_PROFIT_USD,
+        "profit_sentinel_poll_seconds": PROFIT_SENTINEL_POLL_SECONDS,
         "trade_count_anomaly": {
             "count": TRADE_ANOMALY_COUNT,
             "window_seconds": int(TRADE_ANOMALY_WINDOW.total_seconds()),
@@ -399,20 +404,45 @@ def warmup_strategy_from_local_bars(
     )
 
 
-def _flatten_request(position: PositionSnapshot, account: AccountSnapshot) -> OrderRequest:
+def _symbol_max_lots(symbol: str, limits: RiskLimits = RISK_LIMITS) -> Decimal:
+    override = limits.symbol_overrides.get(symbol)
+    if override is not None:
+        return override.max_lot_per_order
+    return limits.active.max_lot_per_order
+
+
+def _flatten_requests(
+    position: PositionSnapshot,
+    account: AccountSnapshot,
+    *,
+    comment: str,
+    limits: RiskLimits = RISK_LIMITS,
+) -> list[OrderRequest]:
     side = "sell" if position.signed_lots > 0 else "buy"
-    lots = abs(position.signed_lots)
-    return OrderRequest(
-        symbol=position.symbol,
-        side=side,
-        lots=lots,
-        price=position.price,
-        contract_size=position.contract_size,
-        strategy_notional=lots * position.contract_size * position.price,
-        comment="strategy_v0_emergency_flatten",
-        existing_positions=[position],
-        account=account,
-    )
+    remaining = abs(position.signed_lots)
+    max_lots = _symbol_max_lots(position.symbol, limits)
+    requests: list[OrderRequest] = []
+    while remaining > 0:
+        lots = min(remaining, max_lots)
+        requests.append(
+            OrderRequest(
+                symbol=position.symbol,
+                side=side,
+                lots=lots,
+                price=position.price,
+                contract_size=position.contract_size,
+                strategy_notional=estimate_account_notional(position.symbol, lots, position.contract_size, position.price),
+                comment=comment,
+                existing_positions=[position],
+                account=account,
+            )
+        )
+        remaining -= lots
+    return requests
+
+
+def _flatten_request(position: PositionSnapshot, account: AccountSnapshot) -> OrderRequest:
+    return _flatten_requests(position, account, comment="strategy_v0_emergency_flatten")[0]
 
 
 def _order_request_from_strategy_order(
@@ -434,7 +464,7 @@ def _order_request_from_strategy_order(
         lots=order.lots,
         price=price,
         contract_size=contract_size,
-        strategy_notional=order.lots * contract_size * price,
+        strategy_notional=estimate_account_notional(order.symbol, order.lots, contract_size, price),
         comment=order.tag or "strategy_v0_live",
         existing_positions=positions,
         account=account,
@@ -478,10 +508,10 @@ def emergency_flatten_positions(
     for position in positions:
         if position.signed_lots == 0:
             continue
-        request = _flatten_request(position, account)
-        result = submitter(request)
-        log_strategy_event("emergency_flatten_order", {"request": request, "result": result})
-        results.append(result)
+        for request in _flatten_requests(position, account, comment="strategy_v0_emergency_flatten"):
+            result = submitter(request)
+            log_strategy_event("emergency_flatten_order", {"request": request, "result": result})
+            results.append(result)
     return results
 
 
@@ -508,6 +538,42 @@ def close_instrument_positions(
     matching = [position for position in positions if position.symbol == symbol and position.signed_lots != 0]
     results = emergency_flatten_positions(matching, account, submitter=submitter)
     log_strategy_event("hard_kill_close_instrument", {"symbol": symbol, "results": results})
+    return results
+
+
+def close_take_profit_positions(
+    positions: list[PositionSnapshot],
+    account: AccountSnapshot,
+    *,
+    threshold: Decimal = TAKE_PROFIT_USD,
+    submitter: Callable[[OrderRequest], OrderResult] = submit_order,
+    now: datetime | None = None,
+) -> list[OrderResult]:
+    """Close positions whose live unrealized profit reaches the take-profit threshold."""
+
+    timestamp = now or datetime.now(timezone.utc)
+    results: list[OrderResult] = []
+    for position in positions:
+        profit = _position_unrealized_pnl(position)
+        if position.signed_lots == 0 or profit < threshold:
+            continue
+        position_results: list[OrderResult] = []
+        for request in _flatten_requests(position, account, comment="strategy_v0_take_profit"):
+            result = submitter(request)
+            position_results.append(result)
+            results.append(result)
+        log_strategy_event(
+            "take_profit_triggered",
+            {
+                "symbol": position.symbol,
+                "ticket": position.ticket,
+                "unrealized_pnl": profit,
+                "threshold": threshold,
+                "signed_lots": position.signed_lots,
+                "results": position_results,
+            },
+            now=timestamp,
+        )
     return results
 
 
@@ -634,6 +700,45 @@ def apply_hard_kills(
     return results
 
 
+def run_profit_sentinel_once(
+    *,
+    account_provider: Callable[[], AccountSnapshot] = get_live_account_snapshot,
+    positions_provider: Callable[[], list[PositionSnapshot]] = get_live_positions_snapshot,
+    submitter: Callable[[OrderRequest], OrderResult] = submit_order,
+    now: datetime | None = None,
+) -> list[OrderResult]:
+    account = account_provider()
+    positions = positions_provider()
+    account.open_positions_count = len(positions)
+    return close_take_profit_positions(positions, account, submitter=submitter, now=now)
+
+
+def sleep_with_profit_sentinel(
+    total_seconds: int,
+    *,
+    poll_seconds: Decimal = PROFIT_SENTINEL_POLL_SECONDS,
+    account_provider: Callable[[], AccountSnapshot] = get_live_account_snapshot,
+    positions_provider: Callable[[], list[PositionSnapshot]] = get_live_positions_snapshot,
+    submitter: Callable[[OrderRequest], OrderResult] = submit_order,
+) -> None:
+    """Sleep between strategy cycles while checking take-profit at second-level cadence."""
+
+    if total_seconds <= 0:
+        return
+    deadline = time.monotonic() + total_seconds
+    interval = float(poll_seconds)
+    while True:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return
+        time.sleep(min(interval, remaining))
+        run_profit_sentinel_once(
+            account_provider=account_provider,
+            positions_provider=positions_provider,
+            submitter=submitter,
+        )
+
+
 def check_margin_or_flatten(
     account: AccountSnapshot,
     positions: list[PositionSnapshot],
@@ -716,6 +821,8 @@ def run_live_loop(
             "strategy": strategy.name,
             "symbols": settings.tradable_symbols,
             "hard_kills_armed": hard_kill_armed_status(),
+            "take_profit_usd": TAKE_PROFIT_USD,
+            "profit_sentinel_poll_seconds": PROFIT_SENTINEL_POLL_SECONDS,
             "destroyer_symbols": sorted(strategy.destroyer_symbols),
         },
     )
@@ -773,7 +880,7 @@ def run_live_loop(
         count += 1
         if iterations is not None and count >= iterations:
             break
-        time.sleep(sleep_seconds)
+        sleep_with_profit_sentinel(sleep_seconds)
 
 
 def main() -> int:

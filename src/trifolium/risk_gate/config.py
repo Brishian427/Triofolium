@@ -35,6 +35,14 @@ class SymbolOverride(BaseModel):
     max_lot_per_order: Decimal
 
 
+class SymbolSideRule(BaseModel):
+    """Symbol-specific allowed order sides."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    allowed_sides: list[Literal["buy", "sell"]]
+
+
 class HardFloors(BaseModel):
     """Hard floors that apply in every mode."""
 
@@ -53,6 +61,7 @@ class RiskLimits(BaseModel):
     calibration: ModeLimits
     production: ModeLimits
     symbol_overrides: dict[str, SymbolOverride] = Field(default_factory=dict)
+    symbol_side_rules: dict[str, SymbolSideRule] = Field(default_factory=dict)
     hard_floors: HardFloors
 
     @model_validator(mode="after")

@@ -35,7 +35,7 @@ def account(equity: str = "1000000", margin_level: str = "1000") -> AccountSnaps
 
 def request(
     *,
-    symbol: str = "AUDUSD",
+    symbol: str = "GBPUSD",
     side: str = "buy",
     lots: str = "0.01",
     price: str = "0.7000",
@@ -72,13 +72,28 @@ def high_leverage_positions() -> list[PositionSnapshot]:
 def build_cases() -> list[DryRunCase]:
     base = datetime(2026, 6, 24, 12, 0, tzinfo=timezone.utc)
     cases: list[DryRunCase] = []
-    for index in range(5):
-        cases.append(DryRunCase(f"legitimate_{index + 1}", request(timestamp=base + timedelta(minutes=index)), "filled"))
     for index in range(3):
+        cases.append(DryRunCase(f"legitimate_{index + 1}", request(timestamp=base + timedelta(minutes=index)), "filled"))
+    cases.append(
+        DryRunCase(
+            "audusd_sell_allowed",
+            request(symbol="AUDUSD", side="sell", timestamp=base + timedelta(minutes=3)),
+            "filled",
+        )
+    )
+    cases.append(
+        DryRunCase(
+            "audusd_buy_blocked",
+            request(symbol="AUDUSD", side="buy", timestamp=base + timedelta(minutes=4)),
+            "rejected",
+            "check_direction_sanity",
+        )
+    )
+    for index in range(2):
         cases.append(
             DryRunCase(
                 f"oversize_{index + 1}",
-                request(lots="0.5", strategy_notional="35000", timestamp=base + timedelta(minutes=10 + index)),
+                request(lots="0.51", strategy_notional="35700", timestamp=base + timedelta(minutes=10 + index)),
                 "rejected",
                 "check_lot_size",
             )
@@ -100,7 +115,7 @@ def build_cases() -> list[DryRunCase]:
                 "check_total_leverage",
             )
         )
-    for index in range(3):
+    for index in range(2):
         cases.append(
             DryRunCase(
                 f"float_drift_{index + 1}",
@@ -115,9 +130,11 @@ def build_cases() -> list[DryRunCase]:
             DryRunCase("rapid_fire_1", request(timestamp=rapid_start), "filled", reset_before=True),
             DryRunCase("rapid_fire_2", request(timestamp=rapid_start + timedelta(seconds=1)), "filled", reset_before=False),
             DryRunCase("rapid_fire_3", request(timestamp=rapid_start + timedelta(seconds=2)), "filled", reset_before=False),
+            DryRunCase("rapid_fire_4", request(timestamp=rapid_start + timedelta(seconds=3)), "filled", reset_before=False),
+            DryRunCase("rapid_fire_5", request(timestamp=rapid_start + timedelta(seconds=4)), "filled", reset_before=False),
             DryRunCase(
-                "rapid_fire_4",
-                request(timestamp=rapid_start + timedelta(seconds=3)),
+                "rapid_fire_6",
+                request(timestamp=rapid_start + timedelta(seconds=5)),
                 "rejected",
                 "check_rate_limit",
                 reset_before=False,

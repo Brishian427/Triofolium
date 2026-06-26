@@ -1,0 +1,15 @@
+data_dir: pricer-output-2026-05-11_2026-06-10
+default_start: "2026-05-11T00:00:00Z"
+default_end: "2026-06-10T23:59:59Z"
+initial_equity: "1000000"
+leverage: "30"
+slippage:
+  market_price_units: "0"
+filters:
+  worst_window_maxdd_pct: "5"
+  coefficient_variation_threshold: "3"
+  negative_return_fraction_threshold: "0.4"
+risk_discipline:
+  max_leverage: "28"
+  max_leverage_minutes: 25
+  max_single_symbol_concentration_pct: "40"

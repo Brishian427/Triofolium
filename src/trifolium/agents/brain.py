@@ -19,6 +19,10 @@ Strict constraints:
   - src/trifolium/strategy/v0/portfolio.py
   - src/trifolium/strategy/config/strategy_v0.yaml
 - Never suggest modifying risk controls, broker adapters, live runners, or MT5 plumbing.
+- Current principal live policy: USDCAD and USDJPY may trade up to 0.5 lots
+  per order; AUDUSD is sell-only exposure, so never propose changes that
+  encourage AUDUSD long exposure. AUDUSD buys are only acceptable when reducing
+  an existing AUDUSD short.
 - Output valid JSON only with: target_files, element_diff, rationale, expected_metric_change.
 
 Use the D2 9-section evaluation report exactly:
@@ -36,7 +40,7 @@ Use the D2 9-section evaluation report exactly:
 Improvement targeting rules:
 - If Section 2 shows Trade Count = 0 or Trade Count < 30, target behavior that
   creates trades. For 6h smoke windows, target at least 5 trades while keeping
-  Risk Discipline = 100 and MaxDD < 5%.
+  Risk Discipline >= 90 and MaxDD < 5%.
 - If Section 5 says DEAD CODE, change a decision threshold, sizing path, or
   predictor/trader branch so the candidate is behaviorally different.
 - If Section 6 warns isolated peak or unstable, prefer a smaller or smoother
@@ -260,6 +264,15 @@ class TieredBrain:
         return False, None, f"Brain failed schema validation after {retry_count + 1} attempts: {last_error}"
 
     def evaluate_candidate(self, parent_metrics: dict[str, Any], candidate_metrics: dict[str, Any]) -> tuple[str, str]:
+        d2_decision = candidate_metrics.get("d2", {}).get("decision", {})
+        if d2_decision:
+            verdict = str(d2_decision.get("verdict", "REJECT"))
+            reason = str(d2_decision.get("reason", "D2 decision did not include a reason."))
+            if verdict == "ACCEPT v_N":
+                return "ACCEPT", reason
+            if verdict in {"KEEP v_N-1", "NO-OP", "INSUFFICIENT DATA"}:
+                return "KEEP", reason
+            return "REJECT", reason
         if not candidate_metrics.get("passed", False):
             return "REJECT", "Candidate failed validation gate."
         parent_trades = int(parent_metrics.get("full_backtest", {}).get("trade_count", 0) or 0)

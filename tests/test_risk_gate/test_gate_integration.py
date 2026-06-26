@@ -16,7 +16,7 @@ def test_submit_order_rejects_first_failed_check_without_sender(make_request, mo
         return OrderExecutionResult(status="filled")
 
     monkeypatch.setattr(gate, "send_order_to_mt5", fake_sender)
-    result = gate.submit_order(make_request(lots=Decimal("0.5")))
+    result = gate.submit_order(make_request(lots=Decimal("0.51")))
     assert result.status == "rejected"
     assert result.reason.startswith("check_lot_size:")
     assert calls["sender"] == 0
@@ -77,7 +77,7 @@ def test_submit_order_logs_rejections_and_passes(make_request, monkeypatch, tmp_
 
     monkeypatch.setattr("trifolium.risk_gate.logging.risk_gate_log_path", fake_log_path)
     monkeypatch.setattr(gate, "send_order_to_mt5", fake_sender)
-    rejected = gate.submit_order(make_request(lots=Decimal("0.5")))
+    rejected = gate.submit_order(make_request(lots=Decimal("0.51")))
     accepted = gate.submit_order(make_request())
     assert rejected.status == "rejected"
     assert accepted.status == "filled"

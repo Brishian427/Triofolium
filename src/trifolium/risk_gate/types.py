@@ -22,6 +22,8 @@ class PositionSnapshot(BaseModel):
     contract_size: Decimal
     ticket: int | None = None
     unrealized_pnl: Decimal | None = None
+    comment: str | None = None
+    magic: int | None = None
 
 
 class AccountSnapshot(BaseModel):

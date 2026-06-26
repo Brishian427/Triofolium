@@ -1,0 +1,41 @@
+# Calibration mode (Round 1 remainder) - looser, lets calibration trades through
+# Production mode (Round 2+) - tight defaults below
+mode: production  # values: calibration | production
+
+calibration:
+  max_lot_per_order: 0.05         # AUDUSD-equivalent. Calibration trades are 0.01.
+  max_total_leverage: 2.0         # Very low, calibration shouldn't accumulate exposure
+  max_single_symbol_pct: 100      # Calibration uses one symbol at a time
+  numeric_tolerance_abs: 0.000001
+  numeric_tolerance_rel: 0.0001
+  max_orders_per_minute: 3        # Calibration is slow & deliberate
+
+production:
+  max_lot_per_order: 0.5          # Principal override: generic live cap is now 0.5 lots.
+  max_total_leverage: 5.0         # Margin level stays comfortably above stop-out
+  max_single_symbol_pct: 40       # Diversification floor
+  numeric_tolerance_abs: 0.000001
+  numeric_tolerance_rel: 0.0001
+  max_orders_per_minute: 5
+
+# Symbol-specific lot caps (when a symbol's notional varies wildly from base assumption)
+symbol_overrides:
+  USDCAD:
+    max_lot_per_order: 0.5        # Principal override: allow USDCAD conviction trades up to 0.5 lots.
+  USDJPY:
+    max_lot_per_order: 0.5        # Principal override: allow USDJPY conviction trades up to 0.5 lots.
+  XAUUSD:
+    max_lot_per_order: 0.1        # Keep gold bounded separately from the generic FX cap.
+  XAGUSD:
+    max_lot_per_order: 0.01       # Phase H control: silver lot convention can dominate notional quickly.
+  BTCUSD:
+    max_lot_per_order: 0.05       # TBD, verify lot convention in Task 01
+
+# Hard floors (never breached regardless of mode)
+hard_floors:
+  min_margin_level_pct: 200       # Stop placing new orders below this
+  max_drawdown_session_pct: 5     # If session drawdown breaches this, lock the gate
+
+symbol_side_rules:
+  AUDUSD:
+    allowed_sides: ["sell"]       # Principal override: sell-only exposure; buy is allowed only to reduce an existing short.

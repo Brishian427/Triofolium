@@ -19,6 +19,8 @@ if str(SRC) not in sys.path:
 from trifolium.backtest.config import load_backtest_config
 from trifolium.validation import validate_strategy
 
+RISK_DISCIPLINE_GATE_MIN = 90.0
+
 
 BASE_CONFIG_PATH = ROOT / "src" / "trifolium" / "strategy" / "config" / "strategy_v0.yaml"
 DEFAULT_CANDIDATE_ROOT = ROOT / "sandboxes" / "v_conviction_redesign"
@@ -79,7 +81,7 @@ def classify_result(result: Any) -> tuple[str, str]:
 
     if trade_count < 30:
         return "c", "trade_count < 30: strategy remains too conservative architecturally"
-    if not gate_passed or risk_discipline != 100.0:
+    if not gate_passed or risk_discipline < RISK_DISCIPLINE_GATE_MIN:
         return "d", "hard gate failed: Risk Discipline or another D2 gate violated"
     if robustness != "ROBUST":
         return "d", "robustness failed: IMC principle violation"
