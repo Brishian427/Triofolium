@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project Trifolium</title>
+  <style>
+    :root {
+      --bg: #0d1b2a;
+      --card: #142236;
+      --card2: #192b43;
+      --gold: #d4a843;
+      --green: #1fa463;
+      --purple: #8c6be8;
+      --coral: #ff7468;
+      --text: #f4f7fb;
+      --muted: #aab7c7;
+      --line: rgba(255,255,255,.14);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Book Antiqua", Georgia, "Times New Roman", serif;
+      line-height: 1.55;
+    }
+    a { color: var(--gold); }
+    .wrap { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+    section { padding: 56px 0; border-top: 1px solid var(--line); }
+    h1, h2, h3 { margin: 0; color: var(--gold); letter-spacing: .2px; }
+    h1 { font-size: clamp(2.4rem, 7vw, 5.6rem); line-height: 1.02; }
+    h2 { font-size: clamp(1.7rem, 3.5vw, 2.6rem); margin-bottom: 22px; }
+    h3 { font-size: 1.08rem; margin-bottom: 6px; }
+    p { margin: 0; }
+    .hero {
+      min-height: 92vh;
+      display: grid;
+      align-items: center;
+      text-align: center;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(31,164,99,.18), transparent 28%),
+        radial-gradient(circle at 80% 10%, rgba(212,168,67,.14), transparent 24%),
+        var(--bg);
+      border-top: 0;
+    }
+    .subtitle { margin-top: 18px; font-size: clamp(1.18rem, 2.6vw, 1.7rem); color: var(--text); }
+    .meta { margin-top: 10px; color: var(--muted); font-size: 1.05rem; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(130px, 1fr));
+      gap: 14px;
+      margin-top: 34px;
+    }
+    .stat, .card, .cell, .node, .tree-item {
+      background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018)), var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 14px 30px rgba(0,0,0,.18);
+    }
+    .stat { padding: 18px 14px; }
+    .stat b { display: block; color: var(--gold); font-size: 1.55rem; }
+    .stat span { color: var(--muted); font-size: .95rem; }
+    .svg-panel {
+      background: #091522;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+    }
+    svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+    .bands { display: grid; gap: 16px; }
+    .band { display: grid; grid-template-columns: 140px 1fr; gap: 14px; align-items: stretch; }
+    .band-label {
+      border-radius: 8px;
+      padding: 16px;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      color: white;
+      text-align: center;
+    }
+    .signal { background: linear-gradient(135deg, #13794a, var(--green)); }
+    .decision { background: linear-gradient(135deg, #5940a8, var(--purple)); }
+    .risk { background: linear-gradient(135deg, #b84e45, var(--coral)); }
+    .cells { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .cell { padding: 15px; min-height: 106px; }
+    .cell small { color: var(--muted); display: block; }
+    .tree {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .tree-item { padding: 16px; border-left: 4px solid var(--muted); }
+    .pass { border-left-color: var(--green); }
+    .warn { border-left-color: var(--gold); }
+    .fail { border-left-color: var(--coral); }
+    .live { border-left-color: #4fd1ff; }
+    .tag { display: inline-block; margin-top: 10px; padding: 3px 8px; border-radius: 99px; font-size: .78rem; color: #07111e; background: var(--gold); font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 8px; overflow: hidden; }
+    th, td { padding: 14px 12px; text-align: left; border-bottom: 1px solid var(--line); }
+    th { color: var(--gold); background: #101d2f; }
+    .positive { color: #62e38f; font-weight: 700; }
+    .negative { color: #ff8c83; font-weight: 700; }
+    .note { margin-top: 12px; color: var(--muted); }
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .card { padding: 22px; }
+    .card.green { border-color: rgba(31,164,99,.52); background: linear-gradient(180deg, rgba(31,164,99,.14), transparent), var(--card); }
+    .card.red { border-color: rgba(255,116,104,.5); background: linear-gradient(180deg, rgba(255,116,104,.14), transparent), var(--card); }
+    .card ul { margin: 14px 0 0; padding-left: 20px; color: var(--muted); }
+    .banner {
+      margin-top: 18px;
+      padding: 18px;
+      border: 1px solid rgba(212,168,67,.55);
+      border-radius: 8px;
+      background: rgba(212,168,67,.1);
+      color: var(--gold);
+      text-align: center;
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+    footer { padding: 36px 0 52px; color: var(--muted); text-align: center; border-top: 1px solid var(--line); }
+    @media (max-width: 820px) {
+      .stats, .tree, .split { grid-template-columns: 1fr; }
+      .band { grid-template-columns: 1fr; }
+      .cells { grid-template-columns: 1fr 1fr; }
+      th, td { font-size: .92rem; padding: 10px 8px; }
+    }
+    @media (max-width: 520px) { .cells { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <div class="wrap">
+      <h1>☘ Project Trifolium ☘</h1>
+      <p class="subtitle">A self-improving algorithmic trading system with institutional risk governance</p>
+      <p class="meta">MOMQ Finals · Account 10181 · Tech Prize Track</p>
+      <div class="stats">
+        <div class="stat"><b>178</b><span>automated deals</span></div>
+        <div class="stat"><b>+$495</b><span>realized harvester P&amp;L</span></div>
+        <div class="stat"><b>12,619</b><span>Risk Gate decisions</span></div>
+        <div class="stat"><b>9</b><span>D2 evaluation sections</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>How the loop works</h2>
+      <div class="svg-panel">
+        <svg viewBox="0 0 980 340" role="img" aria-label="Self improving loop diagram">
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L9,3 z" fill="#1FA463"></path>
+            </marker>
+            <style>
+              .box{fill:#142236;stroke:#1FA463;stroke-width:2;rx:10}
+              .label{fill:#fff;font-family:Book Antiqua,Georgia,serif;font-size:22px;font-weight:700}
+              .sub{fill:#aab7c7;font-family:Book Antiqua,Georgia,serif;font-size:14px}
+              .arr{stroke:#1FA463;stroke-width:3;fill:none;marker-end:url(#arrow)}
+              .dash{stroke:#D4A843;stroke-width:3;fill:none;stroke-dasharray:8 8;marker-end:url(#arrow)}
+            </style>
+          </defs>
+          <rect x="20" y="95" width="150" height="95" class="box"></rect>
+          <text x="95" y="132" text-anchor="middle" class="label">Brain</text>
+          <text x="95" y="158" text-anchor="middle" class="sub">Navigator + Architect</text>
+          <rect x="220" y="95" width="150" height="95" class="box"></rect>
+          <text x="295" y="132" text-anchor="middle" class="label">Coder</text>
+          <text x="295" y="158" text-anchor="middle" class="sub">Sonnet patch</text>
+          <rect x="420" y="95" width="150" height="95" class="box"></rect>
+          <text x="495" y="132" text-anchor="middle" class="label">Sandbox</text>
+          <text x="495" y="158" text-anchor="middle" class="sub">guarded candidate</text>
+          <rect x="620" y="95" width="150" height="95" class="box"></rect>
+          <text x="695" y="132" text-anchor="middle" class="label">D2 Evaluator</text>
+          <text x="695" y="158" text-anchor="middle" class="sub">gates + robustness</text>
+          <rect x="820" y="95" width="140" height="95" class="box"></rect>
+          <text x="890" y="132" text-anchor="middle" class="label">Memory</text>
+          <text x="890" y="158" text-anchor="middle" class="sub">candidate table</text>
+          <path d="M170 142 H220" class="arr"></path>
+          <path d="M370 142 H420" class="arr"></path>
+          <path d="M570 142 H620" class="arr"></path>
+          <path d="M770 142 H820" class="arr"></path>
+          <path d="M890 95 C890 28 95 28 95 95" class="dash"></path>
+          <text x="490" y="52" text-anchor="middle" fill="#D4A843" font-family="Book Antiqua,Georgia,serif" font-size="18">feedback: accepted/rejected candidates shape the next branch</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Element Periodic Table</h2>
+      <div class="bands">
+        <div class="band">
+          <div class="band-label signal">Signal</div>
+          <div class="cells">
+            <div class="cell"><h3>Feature Set</h3><small>lagged returns, volatility, cross-symbol context</small></div>
+            <div class="cell"><h3>Model Family</h3><small>ridge bootstrap, lasso, random forest</small></div>
+            <div class="cell"><h3>Target Form</h3><small>rank cross-sectional vs absolute return</small></div>
+            <div class="cell"><h3>Horizon</h3><small>15m, 1h, 4h ensemble candidates</small></div>
+          </div>
+        </div>
+        <div class="band">
+          <div class="band-label decision">Decision</div>
+          <div class="cells">
+            <div class="cell"><h3>Compression</h3><small>sigmoid, threshold, discrete tiers</small></div>
+            <div class="cell"><h3>Universe</h3><small>FX-only, metals-enabled, all tradable</small></div>
+            <div class="cell"><h3>Sizing</h3><small>linear, sigmoid, risk-budgeted lots</small></div>
+            <div class="cell"><h3>Cost Gate</h3><small>spread-aware entry filter</small></div>
+          </div>
+        </div>
+        <div class="band">
+          <div class="band-label risk">Risk</div>
+          <div class="cells">
+            <div class="cell"><h3>Constraints</h3><small>currency decomposition, concentration checks</small></div>
+            <div class="cell"><h3>Time Filter</h3><small>session gates tested, then demoted</small></div>
+            <div class="cell"><h3>Drawdown Gate</h3><small>soft scaling, hard stops, emergency flatten</small></div>
+            <div class="cell"><h3>Operator Risk</h3><small>manual exposure isolation and audit</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>What the loop explored</h2>
+      <div class="tree">
+        <div class="tree-item warn"><h3>v0 baseline</h3><p>0-trade feature became a diagnostic anchor.</p><span class="tag">baseline</span></div>
+        <div class="tree-item fail"><h3>10 iterations</h3><p>Brain over-targeted thresholds before D2 alignment.</p><span class="tag">learning</span></div>
+        <div class="tree-item warn"><h3>candidate_i</h3><p>Passed short smoke but failed robustness.</p><span class="tag">rejected</span></div>
+        <div class="tree-item warn"><h3>conviction redesign</h3><p>Dropped forced participation, restored signal geometry.</p><span class="tag">diagnostic</span></div>
+        <div class="tree-item pass"><h3>Phase H base</h3><p>Risk-budgeted FX candidate exposed marginal edge.</p><span class="tag">candidate</span></div>
+        <div class="tree-item pass"><h3>H2 strict</h3><p>98 trades, RD=100, robust, near spread-cost boundary.</p><span class="tag">selected</span></div>
+        <div class="tree-item live"><h3>deployed</h3><p>Risk Gate production path, JSONL observability.</p><span class="tag">live</span></div>
+        <div class="tree-item live"><h3>harvester</h3><p>Fixed-direction executor with $5 take-profit cycles.</p><span class="tag">evidence</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Real audit trail (magic number separation)</h2>
+      <table>
+        <thead><tr><th>Actor</th><th>Magic / Comment</th><th>Realized P&amp;L</th><th>Deals</th></tr></thead>
+        <tbody>
+          <tr><td>Profit harvester</td><td>10181 / profit_harvester</td><td class="positive">+$494.98</td><td>178</td></tr>
+          <tr><td>Reconcile</td><td>10181 / harv_reconcile</td><td class="negative">-$112.89</td><td>3</td></tr>
+          <tr><td>Emergency</td><td>10181 / strategy_v0_emer</td><td class="negative">-$202.64</td><td>1</td></tr>
+          <tr><td>Manual (principal)</td><td>0 / (blank)</td><td class="negative">-$266.97</td><td>108</td></tr>
+        </tbody>
+      </table>
+      <p class="note">Open floating loss: -$12,727 on 2 manual positions.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Algorithmic vs Discretionary — same strategy, two executors</h2>
+      <div class="split">
+        <div class="card green">
+          <h3>Algorithmic executor</h3>
+          <p class="positive">magic = 10181 · +$494.98</p>
+          <ul>
+            <li>178 automated deals</li>
+            <li>100% rule adherence</li>
+            <li>0 audit attribution violations</li>
+            <li>Orders passed through Risk Gate</li>
+          </ul>
+        </div>
+        <div class="card red">
+          <h3>Discretionary executor</h3>
+          <p class="negative">magic = 0 · -$266.97 realized</p>
+          <ul>
+            <li>108 manual/client-side deals</li>
+            <li>XAGUSD edge +$547 demonstrated</li>
+            <li>XAUUSD direction-lock violated</li>
+            <li>Floating -$12,727 from manual positions</li>
+          </ul>
+        </div>
+      </div>
+      <div class="banner">Principal-risk IS system-risk.</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Constitutional refinements + next iteration</h2>
+      <div class="split">
+        <div class="card">
+          <h3>Refinements discovered live</h3>
+          <ul>
+            <li>Rate limits must distinguish risk-increasing from risk-reducing actions.</li>
+            <li>Session gates must not encode the operator's real-world calendar.</li>
+            <li>Manual positions require explicit ownership and automation opt-in.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Next iteration</h3>
+          <ul>
+            <li>Principal-protection layer: exposure caps, cool-downs, override locks.</li>
+            <li>Absolute-return target formulation instead of only cross-sectional rank.</li>
+            <li>Momentum context features and multi-horizon prediction.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <p>☘ Built for MOMQ Finals Tech Prize 2026 by Jianing Shi ☘</p>
+      <p><a href="https://github.com/Brishian427/Triofolium">GitHub Repository</a></p>
+    </div>
+  </footer>
+</body>
+</html>
