@@ -47,7 +47,7 @@
 - 2026-06-24: Completed Task 02 Risk Gate L3 observability: added scheduled account-state logging, JSONL output at `logs\account_state_YYYY-MM-DD.jsonl`, margin-buffer WARNING, LOCKED-state CRITICAL logging, currency decomposition, and biggest single-symbol exposure.
 - 2026-06-24: Created and ran `scripts\risk_gate_dry_run.py`; all 20 synthetic mocked cases produced expected outcomes.
 - 2026-06-24: Verified L3/dry-run with `python -m compileall src scripts tests`, full `pytest tests -q` result `34 passed`, dry-run exit code `0`, standing static grep found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, and tests contain no `MetaTrader5` imports.
-- 2026-06-25: Applied Style B pivot: P0 Risk Gate live approval remains deferred, P1 Task 01 L2 calibration is deprecated, P2 reusable L5 validation is approved, and Task 05 self-improving loop is explicitly not built in this round.
+- 2026-06-25: Applied Style B pivot: P0 Risk Gate live approval remains deferred, P1 Task 01 L2 calibration is deprecated, P2 reusable L5 validation is approved, and Task 05 self-evolving loop is explicitly not built in this round.
 - 2026-06-25: Implemented Task 03 bar-level multi-symbol fast path for bar-only strategies, including parquet row-group aggregation into 15-minute bars and cached bar replay for StrategyV0 validation.
 - 2026-06-25: Refactored L5 into reusable callable `trifolium.validation.validate_strategy(...) -> ValidationResult` with machine-readable JSON plus markdown output.
 - 2026-06-25: Optimized StrategyV0 validation runtime by vectorizing training-matrix construction and limiting current prediction features to the required recent lookback while preserving no-future daily recalibration semantics.
@@ -55,7 +55,7 @@
 - 2026-06-25: Generated 4-strategy comparison report `reports\strategy_v0_l5_comparison_20260625_110131.md` and machine-readable JSON.
 - 2026-06-25: Added guarded L6 readiness harness `scripts\live_run_strategy_v0.py` and tests; the harness refuses to start live unless Risk Gate is production mode and principal passes `--live-approved`.
 - 2026-06-25: Verified `python -m compileall src scripts tests`, full `pytest tests -q` result `40 passed`, standing static grep found `mt5.order_send` only in `src\trifolium\risk_gate\execution.py`, and tests contain no direct `MetaTrader5` imports.
-- 2026-06-25: Read Task 05 self-improving loop spec fully and switched project goal/plan to Task 05 Plan A.
+- 2026-06-25: Read Task 05 self-evolving loop spec fully and switched project goal/plan to Task 05 Plan A.
 - 2026-06-25: Installed Task 05 API client dependencies `openai` and `anthropic`, then regenerated `requirements.txt`.
 - 2026-06-25: Task 05 C1/C2 early API sanity passed: NVIDIA nano smoke call returned OK and Anthropic cheap smoke call returned OK; no secret values were printed.
 - 2026-06-25: Built Task 05 C1-C9: NIM client, Anthropic client, Strategy Element Table, SQLite Strategy Memory, Scope Guard, Guardrails, Brain, Coder, and Loop Orchestrator.

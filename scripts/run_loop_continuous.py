@@ -1,4 +1,4 @@
-"""Run the self-improving loop repeatedly with config-defined pacing."""
+"""Run the self-evolving loop repeatedly with config-defined pacing."""
 
 from __future__ import annotations
 

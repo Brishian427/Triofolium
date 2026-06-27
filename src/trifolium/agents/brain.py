@@ -57,7 +57,7 @@ threshold relaxation, signal compression, sizing activation, trader branch, or
 predictor gating are all acceptable if they stay inside allowed target files.
 """
 
-NAVIGATOR_SYSTEM_PROMPT = """You are the navigator for Triofolium's self-improving strategy loop.
+NAVIGATOR_SYSTEM_PROMPT = """You are the navigator for Triofolium's self-evolving strategy loop.
 Choose the next branch direction only. Do not write code or patches.
 Return a concise navigation note with: branch_type, target_area, and why.
 Stay within StrategyV0 sandbox files only.

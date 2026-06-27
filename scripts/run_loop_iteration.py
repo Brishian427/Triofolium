@@ -1,4 +1,4 @@
-"""Run one Task 05 self-improving loop iteration."""
+"""Run one Task 05 self-evolving loop iteration."""
 
 from __future__ import annotations
 
@@ -64,7 +64,7 @@ def seed_v0(memory: StrategyMemory) -> None:
         element_table=decompose_v0().model_dump(mode="json"),
         metrics=metrics,
         decision="BASELINE",
-        rationale="Initial StrategyV0 D2 baseline for Task 05 self-improving loop.",
+        rationale="Initial StrategyV0 D2 baseline for Task 05 self-evolving loop.",
         current_rank=0,
         modification_type="baseline",
     )

@@ -30,7 +30,7 @@ class FilterOutcome(BaseModel):
 
 
 class ValidationResult(BaseModel):
-    """Reusable L5 output for scripts and future self-improving candidates."""
+    """Reusable L5 output for scripts and future self-evolving candidates."""
 
     strategy: str
     symbols: list[str]

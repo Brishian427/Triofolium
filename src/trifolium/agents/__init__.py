@@ -1,2 +1,2 @@
-"""Agent clients and guards for the self-improving loop."""
+"""Agent clients and guards for the self-evolving loop."""
 

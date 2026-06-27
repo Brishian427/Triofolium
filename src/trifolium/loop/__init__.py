@@ -1,1 +1,1 @@
-"""Self-improving loop orchestration package."""
+"""Self-evolving loop orchestration package."""

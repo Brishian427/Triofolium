@@ -82,7 +82,7 @@
 
 ## 2026-06-25 Task 05 Plan A Boundary Rules
 
-**Context:** Task 05 starts a self-improving loop that can generate and patch candidate strategies.
+**Context:** Task 05 starts a self-evolving loop that can generate and patch candidate strategies.
 **Options:** Let candidates patch the live tree; isolate candidates in sandboxes; defer the loop.
 **Decision:** Build the loop in Plan A mode but keep candidate patches sandbox-only. The loop must not modify live StrategyV0, `risk_gate`, `risk_limits.yaml`, or `strategy.py`.
 **Rationale:** This preserves institution-as-first-class safety while still allowing a real first iteration and demo narrative.
@@ -98,8 +98,8 @@
 
 ## 2026-06-25 Make L5 Validation Callable and Cache Bar Data
 
-**Context:** The self-improving loop in Task 05 will need to validate many candidate strategies through the same L5 gate.
-**Options:** Keep L5 as a one-shot CLI script; expose a callable while leaving existing script behavior intact; build the full self-improving loop now.
+**Context:** The self-evolving loop in Task 05 will need to validate many candidate strategies through the same L5 gate.
+**Options:** Keep L5 as a one-shot CLI script; expose a callable while leaving existing script behavior intact; build the full self-evolving loop now.
 **Decision:** Add `trifolium.validation.validate_strategy(...) -> ValidationResult` and cache StrategyV0 bar data for repeated Filter 1/2/3 runs.
 **Rationale:** This gives Task 05 a reusable deployment gate without prematurely building the loop. Cached bar replay preserves bar-level semantics and avoids repeated parquet scans.
 **Consequences:** L5 now writes both human-readable markdown and machine-readable JSON. Task 05 can call the validation API directly.

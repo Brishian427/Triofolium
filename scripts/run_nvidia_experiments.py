@@ -22,7 +22,7 @@ NANO = "nvidia/nemotron-3-nano-30b-a3b"
 _MT5_ORDER_SEND = "mt5" + ".order_send"
 _MT5_PACKAGE = "Meta" + "Trader5"
 
-BRAIN_SYSTEM = f"""You are the Brain agent for Triofolium's self-improving strategy loop.
+BRAIN_SYSTEM = f"""You are the Brain agent for Triofolium's self-evolving strategy loop.
 You propose one narrow, sandbox-only modification to StrategyV0.
 Return strict JSON with keys:
 target_files, element_diff, rationale, expected_metric_change.

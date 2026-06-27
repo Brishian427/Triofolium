@@ -1,4 +1,4 @@
-"""Eight-step self-improving strategy discovery loop."""
+"""Eight-step self-evolving strategy discovery loop."""
 
 from __future__ import annotations
 

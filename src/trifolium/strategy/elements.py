@@ -1,4 +1,4 @@
-"""Strategy Element Table for explicit self-improvement dimensions."""
+"""Strategy Element Table for explicit self-evolution dimensions."""
 
 from __future__ import annotations
 

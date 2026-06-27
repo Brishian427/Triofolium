@@ -197,7 +197,7 @@ def render_html() -> str:
 </head>
 <body>
 <main>
-  <h1>Task 05 Self-Improving Loop</h1>
+  <h1>Task 05 Self-Evolving Loop</h1>
   <p>Current iteration count: {len(entries)}</p>
   <section>
     <h2>Memory Table</h2>

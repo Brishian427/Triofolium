@@ -252,12 +252,12 @@ Phase D/E diagnostics are complete; live deployment is stopped until a candidate
 
 Time: 2026-06-25 15:25:20
 Title: Phase A Ten D2 Iterations No-Deploy
-Context: After D2 implementation, the principal requested Sonnet patch fixes and 10 D2-formatted self-improving iterations. A4 selection produced zero qualifying candidates, so deployment was stopped by rule.
+Context: After D2 implementation, the principal requested Sonnet patch fixes and 10 D2-formatted self-evolving iterations. A4 selection produced zero qualifying candidates, so deployment was stopped by rule.
 
 Sextant Details:
 ### PLAN
 #### Steps
-65. [done 2026-06-25] Fix Sonnet unified diff output/application path, then run 10 D2-formatted self-improving iterations without pausing.
+65. [done 2026-06-25] Fix Sonnet unified diff output/application path, then run 10 D2-formatted self-evolving iterations without pausing.
 66. [done 2026-06-25] Select best candidate only if it meets trade_count, risk discipline, drawdown, and return criteria; no candidate qualified, so no-deploy was selected.
 67. [blocked 2026-06-25] Strengthen Risk Gate production hard kills including $1000 session cumulative loss from startup equity, then run L6 dry-run readiness; blocked by A4 no-qualifying-candidate stop condition.
 68. [blocked 2026-06-25] Deploy live only if D2 candidate criteria and Risk Gate hard-kill/readiness checks all pass; blocked because all 10 candidates failed D2 Section 2 Trade Count/Active Intervals.
@@ -443,7 +443,7 @@ Sextant Details:
 ### PLAN
 #### Steps
 58. [done 2026-06-25] Make Task 05 NIM Brain timeout config-driven with 300s default while keeping Ultra 550B as the selected Brain model.
-59. [done 2026-06-25] Re-run one E2E self-improving iteration; Ultra still timed out at 300s, so the controlled A-D diagnostic was rerun and logged.
+59. [done 2026-06-25] Re-run one E2E self-evolving iteration; Ultra still timed out at 300s, so the controlled A-D diagnostic was rerun and logged.
 60. [done 2026-06-25] Commit `pytest.ini` and the timeout/config fix after tests and the E2E/diagnostic result are logged.
 #### Constraints
 [None]
@@ -571,7 +571,7 @@ Sextant Details:
 
 Time: 2026-06-25 13:10:42
 Title: Task 05 End-to-End Iteration Complete
-Context: After the principal filled API keys, Task 05 Plan A resumed from C1, built all components, passed tests and adversarial checks, and completed one sandboxed self-improving loop iteration.
+Context: After the principal filled API keys, Task 05 Plan A resumed from C1, built all components, passed tests and adversarial checks, and completed one sandboxed self-evolving loop iteration.
 
 Sextant Details:
 ### PLAN
@@ -663,7 +663,7 @@ Sextant Details:
 #### Metadata
 **Last Updated:** 2026-06-25 12:21:01
 #### Completed
-- 2026-06-25: Read Task 05 self-improving loop spec fully and switched project goal/plan to Task 05 Plan A.
+- 2026-06-25: Read Task 05 self-evolving loop spec fully and switched project goal/plan to Task 05 Plan A.
 - 2026-06-25: Installed Task 05 API client dependencies `openai` and `anthropic`, then regenerated `requirements.txt`.
 #### In Progress
 - 2026-06-25: Task 05 C1 is blocked before API sanity calls because `NVIDIA_API_KEY` and `ANTHROPIC_API_KEY` are absent after loading `.env`; no loop components were built.
@@ -674,7 +674,7 @@ Sextant Details:
 
 ### DECISIONS
 #### 2026-06-25 Task 05 Plan A Boundary Rules
-**Context:** Task 05 starts a self-improving loop that can generate and patch candidate strategies.
+**Context:** Task 05 starts a self-evolving loop that can generate and patch candidate strategies.
 **Options:** Let candidates patch the live tree; isolate candidates in sandboxes; defer the loop.
 **Decision:** Build the loop in Plan A mode but keep candidate patches sandbox-only. The loop must not modify live StrategyV0, `risk_gate`, `risk_limits.yaml`, or `strategy.py`.
 **Rationale:** This preserves institution-as-first-class safety while still allowing a real first iteration and demo narrative.
@@ -698,12 +698,12 @@ Task 05 Plan A is blocked at C1/C2 API-key sanity checks; resume from C1 after t
 
 Time: 2026-06-25 12:04:10
 Title: Style B L5 Callable and L6 Harness
-Context: The principal selected Style B: make L5 reusable for the future self-improving loop, run StrategyV0 L5 now, deprecate Task 01 L2 calibration, and proceed to L6 readiness only as a guarded readiness step without live deployment.
+Context: The principal selected Style B: make L5 reusable for the future self-evolving loop, run StrategyV0 L5 now, deprecate Task 01 L2 calibration, and proceed to L6 readiness only as a guarded readiness step without live deployment.
 
 Sextant Details:
 ### PLAN
 #### Steps
-45. [done 2026-06-25] Apply Style B pivot: defer P0 live approval, deprecate Task 01 L2 calibration, approve P2 L5 work, and design L5 validation as a reusable callable for future self-improving loops.
+45. [done 2026-06-25] Apply Style B pivot: defer P0 live approval, deprecate Task 01 L2 calibration, approve P2 L5 work, and design L5 validation as a reusable callable for future self-evolving loops.
 46. [done 2026-06-25] Implement Task 03 bar-level multi-symbol fast path for bar-only strategies such as StrategyV0.
 47. [done 2026-06-25] Refactor L5 validation into a callable API that returns machine-readable JSON plus human-readable markdown.
 48. [done 2026-06-25] Run full StrategyV0 L5 validation and write JSON/markdown reports plus 4-strategy comparison.
@@ -713,7 +713,7 @@ Sextant Details:
 - Task 01 L2 calibration is deprecated; keep `scripts\calibration_trade.py` as archive only and do not maintain it as an active path.
 - P0 Risk Gate live approval is deferred; do not switch `config\risk_limits.yaml` to production or start live StrategyV0 without principal approval.
 #### Risks
-- 2026-06-25: Do not build the self-improving loop itself in this round; only make L5 reusable/callable for Task 05.
+- 2026-06-25: Do not build the self-evolving loop itself in this round; only make L5 reusable/callable for Task 05.
 - 2026-06-25: StrategyV0 L5 currently passes as a flat/no-trade run; treat as validation-gate cleanliness, not trading alpha.
 - 2026-06-25: L6 runtime readiness check correctly refuses while Risk Gate mode is `calibration`; this is expected under P0 deferral.
 
@@ -721,7 +721,7 @@ Sextant Details:
 #### Metadata
 **Last Updated:** 2026-06-25 12:04:10
 #### Completed
-- 2026-06-25: Applied Style B pivot: P0 Risk Gate live approval remains deferred, P1 Task 01 L2 calibration is deprecated, P2 reusable L5 validation is approved, and Task 05 self-improving loop is explicitly not built in this round.
+- 2026-06-25: Applied Style B pivot: P0 Risk Gate live approval remains deferred, P1 Task 01 L2 calibration is deprecated, P2 reusable L5 validation is approved, and Task 05 self-evolving loop is explicitly not built in this round.
 - 2026-06-25: Implemented Task 03 bar-level multi-symbol fast path for bar-only strategies, including parquet row-group aggregation into 15-minute bars and cached bar replay for StrategyV0 validation.
 - 2026-06-25: Refactored L5 into reusable callable `trifolium.validation.validate_strategy(...) -> ValidationResult` with machine-readable JSON plus markdown output.
 - 2026-06-25: Optimized StrategyV0 validation runtime by vectorizing training-matrix construction and limiting current prediction features to the required recent lookback while preserving no-future daily recalibration semantics.
@@ -746,8 +746,8 @@ Sextant Details:
 **Consequences:** Future work should not spend time maintaining or running Task 01 L2 unless the principal explicitly reopens it.
 
 #### 2026-06-25 Make L5 Validation Callable and Cache Bar Data
-**Context:** The self-improving loop in Task 05 will need to validate many candidate strategies through the same L5 gate.
-**Options:** Keep L5 as a one-shot CLI script; expose a callable while leaving existing script behavior intact; build the full self-improving loop now.
+**Context:** The self-evolving loop in Task 05 will need to validate many candidate strategies through the same L5 gate.
+**Options:** Keep L5 as a one-shot CLI script; expose a callable while leaving existing script behavior intact; build the full self-evolving loop now.
 **Decision:** Add `trifolium.validation.validate_strategy(...) -> ValidationResult` and cache StrategyV0 bar data for repeated Filter 1/2/3 runs.
 **Rationale:** This gives Task 05 a reusable deployment gate without prematurely building the loop. Cached bar replay preserves bar-level semantics and avoids repeated parquet scans.
 **Consequences:** L5 now writes both human-readable markdown and machine-readable JSON. Task 05 can call the validation API directly.
@@ -761,13 +761,13 @@ Sextant Details:
 
 ### JOURNAL
 #### 2026-06-25 12:04:10 Session 15
-**Goal:** Execute Style B: build reusable L5 validation for the self-improving-loop direction, run StrategyV0 L5, and proceed to L6 readiness without live deployment.
+**Goal:** Execute Style B: build reusable L5 validation for the self-evolving-loop direction, run StrategyV0 L5, and proceed to L6 readiness without live deployment.
 **Actually Completed:** Added a bar-level multi-symbol backtest path, exposed `trifolium.validation.validate_strategy(...) -> ValidationResult`, optimized StrategyV0 L5 runtime, ran full StrategyV0 L5 with Filter 1/2/3 passing, generated 4-strategy comparison output, and created a guarded L6 readiness harness. Actual L6 runtime readiness remains blocked because Risk Gate is intentionally still in calibration mode under the P0 deferral.
 
 ### GOAL
 #### Completion Criteria
 - [x] Attempt validation through Task 03 where feasible and stop on required failure gates.
-- [x] Refactor L5 validation into reusable callable API for future self-improving loop.
+- [x] Refactor L5 validation into reusable callable API for future self-evolving loop.
 - [x] Implement bar-level multi-symbol fast path for StrategyV0 L5 validation.
 - [x] Run StrategyV0 L5 validation and produce machine-readable JSON plus markdown.
 - [x] Produce 4-strategy comparison table for do_nothing, buy_and_hold_audusd, ping_pong_audusd, and strategy_v0.

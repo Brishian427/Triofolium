@@ -1,4 +1,4 @@
-# Task 05 — Self-Improving Strategy Discovery System
+# Task 05 — Self-Evolving Strategy Discovery System
 
 **Prerequisite**: Tasks 00 (Charter), 01 (Pipeline L0/L1/L3), 02 (Risk Gate L0-L3 + dry-run), 03 (Backtest engine L0/L1 partial + bar-level fast path), 04 (Strategy v0 L0-L4 + L5 callable just landed).
 
@@ -22,7 +22,7 @@ Everything else is implementation detail. If §1, §11, §12 look right, send to
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│  Self-Improving Strategy Discovery Loop (Task 05)                     │
+│  Self-Evolving Strategy Discovery Loop (Task 05)                     │
 └──────────────────────────────────────────────────────────────────────┘
 
   ┌──────────────────────┐      ┌──────────────────────┐
@@ -271,7 +271,7 @@ class AnthropicClient:
         """Returns unified diff format code patch."""
         system = (
             "You are a code generation assistant for a quant trading strategy "
-            "self-improvement loop. Generate a unified diff patch implementing the "
+            "self-evolution loop. Generate a unified diff patch implementing the "
             "given hypothesis. Modify ONLY the files listed in target_files. "
             "Output the patch only, no commentary."
         )

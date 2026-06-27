@@ -49,7 +49,7 @@ class AnthropicClient:
         """Return a unified diff patch implementing a validated hypothesis."""
 
         system = (
-            "You are a code generation assistant for a quant trading strategy self-improvement loop. "
+            "You are a code generation assistant for a quant trading strategy self-evolution loop. "
             "Respond with valid unified diff format only. No prose, no markdown code fences, "
             "no explanation text. Start with --- a/path and +++ b/path lines, or with a valid "
             "diff --git header followed by --- and +++ lines. Modify only the files listed in "

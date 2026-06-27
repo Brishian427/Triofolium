@@ -1,10 +1,12 @@
 # ☘ Project Trifolium ☘
 
+**A Self-Evolving Auto-Research System for Algorithmic Trading under Risk Governance**
+
 > **🌐 [Live Demo](https://brishian427.github.io/Triofolium/) 🌐**
 >
-> A self-improving algorithmic trading system with institutional risk governance. Includes static renders of the strategy tree, SQLite memory table, D2 gates, and live audit trail.
+> Static renders of the strategy tree, SQLite memory table, D2 gates, live audit trail, and final incident attribution.
 
-Project Trifolium is a self-improving algorithmic trading system built for the MOMQ Finals Tech Prize. It combines a multi-LLM strategy discovery loop, an institutional Risk Gate, MT5 live execution, D2 evaluation reports, and a deployed profit harvester that produced auditable live trading evidence during the competition.
+Project Trifolium is an auto-research system: four LLM agents collaboratively explore the design space of algorithmic trading strategies under hard risk-governance constraints. Trading is the application domain, not the whole claim; the core artifact is a repeatable research loop that proposes candidates, mutates them in sandboxes, evaluates them with D2 gate-first reports, writes memory, and only then connects to MT5 through a Risk Gate. The MOMQ Finals deployment produced live evidence from both automated execution and human override, making risk governance part of the research object rather than an afterthought.
 
 ## ☘ Architecture
 
@@ -26,7 +28,7 @@ flowchart LR
 
 ## ☘ Results Summary
 
-- Explored 8 strategy candidates through the self-improving loop.
+- Explored 8 strategy candidates through the self-evolving loop.
 - Implemented the D2 9-section evaluation framework: Identity, Gate Check, Primary Objective, Secondary Metrics, Binding Check, Robustness, Regime Consistency, Failure Modes, Decision.
 - Deployed a profit harvester with approximately +$495 realized automated profit across the live session evidence.
 - Logged 12,619 Risk Gate decisions in the exported demo package.
@@ -42,7 +44,7 @@ Short submission description: [docs/submission_description.txt](docs/submission_
 
 ## System Components
 
-- `src/trifolium/agents/`: self-improving loop brain/coder/guardrail components.
+- `src/trifolium/agents/`: self-evolving loop brain/coder/guardrail components.
 - `src/trifolium/validation/l5.py`: reusable D2 validation callable and report generation.
 - `src/trifolium/risk_gate/`: institutional order gateway, risk checks, logging, and observability.
 - `src/trifolium/strategy/v0/`: Strategy v0 implementation and live strategy interface.
@@ -95,7 +97,7 @@ Latest export snapshot:
 - Competition: MOMQ Finals
 - Account: 10181
 - Broker/server shown by MT5: FTWorldwide-MainTrade
-- Original system objective: build a live self-improving trading institution rather than a single hand-written strategy.
+- Original system objective: build a live self-evolving trading institution rather than a single hand-written strategy.
 
 ## Quick Start
 

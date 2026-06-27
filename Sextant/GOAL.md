@@ -1,6 +1,6 @@
 # Project Goal
 
-**Current Milestone:** Task 05 Self-Improving Strategy Discovery System
+**Current Milestone:** Task 05 Self-Evolving Strategy Discovery System
 **Defined By:** User
 **Date:** 2026-06-22
 
@@ -17,7 +17,7 @@
 - [x] Implement StrategyV0 orchestration compatible with Task 03 Strategy base.
 - [x] Compile/import/test StrategyV0.
 - [x] Attempt validation through Task 03 where feasible and stop on required failure gates.
-- [x] Refactor L5 validation into reusable callable API for future self-improving loop.
+- [x] Refactor L5 validation into reusable callable API for future self-evolving loop.
 - [x] Implement bar-level multi-symbol fast path for StrategyV0 L5 validation.
 - [x] Run StrategyV0 L5 validation and produce machine-readable JSON plus markdown.
 - [x] Produce 4-strategy comparison table for do_nothing, buy_and_hold_audusd, ping_pong_audusd, and strategy_v0.

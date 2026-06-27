@@ -1,4 +1,4 @@
-"""Persistent strategy memory for self-improving loops."""
+"""Persistent strategy memory for self-evolving loops."""
 
 from trifolium.memory.strategy_memory import StrategyMemory
 

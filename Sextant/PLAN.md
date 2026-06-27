@@ -48,7 +48,7 @@
 42. [done 2026-06-24] Continue Task 02 L3 after principal acceptance by adding once-per-minute account-state observability, warning near margin floor, and critical logging on LOCKED state.
 43. [done 2026-06-24] After L3 tests pass, create and run `scripts\risk_gate_dry_run.py` with 20 synthetic mocked cases, then stop for principal review.
 44. Stop and wait for principal review; do not relax live approval gates or proceed to real orders.
-45. [done 2026-06-25] Apply Style B pivot: defer P0 live approval, deprecate Task 01 L2 calibration, approve P2 L5 work, and design L5 validation as a reusable callable for future self-improving loops.
+45. [done 2026-06-25] Apply Style B pivot: defer P0 live approval, deprecate Task 01 L2 calibration, approve P2 L5 work, and design L5 validation as a reusable callable for future self-evolving loops.
 46. [done 2026-06-25] Implement Task 03 bar-level multi-symbol fast path for bar-only strategies such as StrategyV0.
 47. [done 2026-06-25] Refactor L5 validation into a callable API that returns machine-readable JSON plus human-readable markdown.
 48. [done 2026-06-25] Run full StrategyV0 L5 validation and write JSON/markdown reports plus 4-strategy comparison.
@@ -62,13 +62,13 @@
 56. [done 2026-06-25] Run checkpoint test report: `pytest tests -q` result `61 passed`.
 57. [done 2026-06-25] Run final compile, pytest, static grep, adversarial tests, and `scripts/run_loop_iteration.py --parent v0`.
 58. [done 2026-06-25] Make Task 05 NIM Brain timeout config-driven with 300s default while keeping Ultra 550B as the selected Brain model.
-59. [done 2026-06-25] Re-run one E2E self-improving iteration; Ultra still timed out at 300s, so the controlled A-D diagnostic was rerun and logged.
+59. [done 2026-06-25] Re-run one E2E self-evolving iteration; Ultra still timed out at 300s, so the controlled A-D diagnostic was rerun and logged.
 60. [done 2026-06-25] Commit `pytest.ini` and the timeout/config fix after tests and the E2E/diagnostic result are logged.
 61. [done 2026-06-25] Implement Architecture 5 robust Task 05 Brain: Mistral Nemotron navigator plus Super 120B architect, with Nano as documented local/API fallback.
 62. [done 2026-06-25] Re-run Task 05 tests, static checks, and one E2E iteration proving both TieredBrain tiers fire correctly.
 63. [done 2026-06-25] Commit Architecture 5 robust configuration with the requested commit message.
 64. [done 2026-06-25] Implement D2 9-section validation framework in L5 markdown/JSON and align Brain prompt to the D2 sections before any further deployment work.
-65. [done 2026-06-25] Fix Sonnet unified diff output/application path, then run 10 D2-formatted self-improving iterations without pausing.
+65. [done 2026-06-25] Fix Sonnet unified diff output/application path, then run 10 D2-formatted self-evolving iterations without pausing.
 66. [done 2026-06-25] Select best candidate only if it meets trade_count, risk discipline, drawdown, and return criteria; no candidate qualified, so no-deploy was selected.
 67. [blocked 2026-06-25] Strengthen Risk Gate production hard kills including $1000 session cumulative loss from startup equity, then run L6 dry-run readiness; blocked by A4 no-qualifying-candidate stop condition.
 68. [blocked 2026-06-25] Deploy live only if D2 candidate criteria and Risk Gate hard-kill/readiness checks all pass; blocked because all 10 candidates failed D2 Section 2 Trade Count/Active Intervals.
@@ -166,7 +166,7 @@
 - 2026-06-24: Do not run real MT5 orders after L2; dry-run and L3 observability must pass first.
 - 2026-06-24: Dry-run must use mocked MT5 sender only and must not relax the single `mt5.order_send` invariant.
 - 2026-06-24: Principal explicit approval is still required before any live Risk Gate order or calibration trade can be sent.
-- 2026-06-25: Do not build the self-improving loop itself in this round; only make L5 reusable/callable for Task 05.
+- 2026-06-25: Do not build the self-evolving loop itself in this round; only make L5 reusable/callable for Task 05.
 - 2026-06-25: StrategyV0 L5 currently passes as a flat/no-trade run; treat as validation-gate cleanliness, not trading alpha.
 - 2026-06-25: L6 runtime readiness check correctly refuses while Risk Gate mode is `calibration`; this is expected under P0 deferral.
 - 2026-06-25: If NVIDIA API sanity check returns 401/403, stop immediately because Brain cannot call NIM.

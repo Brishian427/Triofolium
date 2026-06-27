@@ -880,7 +880,7 @@ D:\Desktop\Nucleus\Triofolium\
 
 ## [2026-06-25 12:04:10] Session 15
 
-**Goal:** Execute Style B: build reusable L5 validation for the self-improving-loop direction, run StrategyV0 L5, and proceed to L6 readiness without live deployment.
+**Goal:** Execute Style B: build reusable L5 validation for the self-evolving-loop direction, run StrategyV0 L5, and proceed to L6 readiness without live deployment.
 **Actually Completed:** Added a bar-level multi-symbol backtest path, exposed `trifolium.validation.validate_strategy(...) -> ValidationResult`, optimized StrategyV0 L5 runtime, ran full StrategyV0 L5 with Filter 1/2/3 passing, generated 4-strategy comparison output, and created a guarded L6 readiness harness. Actual L6 runtime readiness remains blocked because Risk Gate is intentionally still in calibration mode under the P0 deferral.
 **Files Created:**
 - `D:\Desktop\Nucleus\Triofolium\src\trifolium\backtest\bar_engine.py`
@@ -934,7 +934,7 @@ D:\Desktop\Nucleus\Triofolium\
     `-- DELTA.md
 ```
 **Issues Encountered:** Full L5 initially timed out at 30 minutes because StrategyV0 recomputed O(n^2) training features; vectorizing training-matrix construction reduced full replay to about 26 seconds after one-time bar aggregation. StrategyV0 L5 passed flat with zero trades, which is not alpha evidence.
-**Next Session Starting Point:** Principal can review L5 reports and decide whether to approve Risk Gate production mode for actual L6 runtime readiness, or proceed to Task 05 self-improving loop spec.
+**Next Session Starting Point:** Principal can review L5 reports and decide whether to approve Risk Gate production mode for actual L6 runtime readiness, or proceed to Task 05 self-evolving loop spec.
 
 ## [2026-06-25 12:21:01] Session 16
 
