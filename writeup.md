@@ -1,8 +1,8 @@
-# Project Trifolium: A Self-Improving Algorithmic Trading System with Institutional Risk Governance
+# Project Trifolium: A Self-Evolving Auto-Research System for Algorithmic Trading under Risk Governance
 
 ## Abstract
 
-We built a multi-LLM self-improving loop that explores trading strategy design space, evaluates candidates through an IMC-competition-validated framework, and deploys to live MT5 with production-grade risk governance. During live operation, the system discovered two constitutional design refinements and produced a natural experiment comparing algorithmic versus discretionary execution of closely related trading rules. The result was not a magic alpha model. It was a working trading institution: candidate generation, sandboxed mutation, backtesting, gate-first evaluation, risk-governed execution, JSONL auditability, and post-incident attribution.
+Project Trifolium is a self-evolving auto-research system for algorithmic trading under risk governance. It uses a multi-LLM agent loop to explore strategy design space, mutate candidates in sandboxes, evaluate them through an IMC-competition-validated D2 framework, and connect live execution to MT5 only through institutional controls. The result is not a claim of magic alpha. It is a working research process: candidate generation, sandboxed mutation, backtesting, gate-first evaluation, risk-governed execution, JSONL auditability, and post-incident attribution.
 
 ## 1. Motivation and Design Philosophy
 
@@ -14,29 +14,29 @@ The phrase we used internally was: this is a control problem, not a prediction p
 
 ## 2. Architecture
 
-The full architecture is documented in [architecture.md](architecture.md). The self-improving loop used an Architecture 5 Robust design. A navigator model handles triage and branch navigation. An architect model proposes candidate hypotheses. A coder model generates patches. A fallback path provides degraded-mode resilience when the stronger model path fails or times out.
+The full architecture is documented in [architecture.md](architecture.md). The self-evolving loop used an Architecture 5 Robust design. A navigator model handles triage and branch navigation. An architect model proposes candidate hypotheses. A coder model generates patches. A fallback path provides degraded-mode resilience when the stronger model path fails or times out.
 
 The model roles were intentionally separated. The Navigator, based on the NVIDIA/Mistral Nemotron family, is meant for fast routing: is this a local parameter change, a structural change, or a dead branch? The Architect, using NVIDIA Nemotron Super 120B where available, is used for lower-frequency hypothesis generation. The Coder, Anthropic Sonnet, is used to convert a hypothesis into a patch. The fallback path exists because live systems cannot assume a perfect API day.
 
-The loop does not modify production code directly. It operates through sandbox candidates and a scope guard. The guard is one of the most important parts of the system: self-improvement is only useful if it cannot self-modify into unsafe states. Risk Gate files, risk limits, and the live strategy interface are treated as institutional boundaries rather than strategy material.
+The loop does not modify production code directly. It operates through sandbox candidates and a scope guard. The guard is one of the most important parts of the system: self-evolution is only useful if it cannot self-modify into unsafe states. Risk Gate files, risk limits, and the live strategy interface are treated as institutional boundaries rather than strategy material.
 
 To make exploration structured, we implemented an Element Periodic Table decomposition. A strategy is described through three layers: Signal, Decision, and Risk. Signal includes feature set, model family, and target formulation. Decision includes signal compression, universe filter, and position sizing. Risk includes portfolio constraints, time filters, and drawdown gates. This decomposition prevents the loop from seeing strategy mutation as a bag of arbitrary code edits.
 
 Evaluation is handled by the D2 framework: a 9-section report with gate-first logic. The sections are Identity, Gate Check, Primary Objective, Secondary Metrics, Binding Check, Robustness, Regime Consistency, Failure Modes, Decision. The gate-first philosophy matters. If trade count, risk discipline, drawdown, or active intervals fail, secondary metrics cannot rescue the candidate. This avoids a common competition failure mode: optimizing whatever statistic is easiest to move.
 
-## 3. Self-Improving Loop: What We Found
+## 3. Self-Evolving Loop: What We Found
 
 Across Phase G, H, and I, we explored 8+ strategy candidates. The most useful discovery was negative in the scientific sense: strategy v0 had a marginal directional edge, but the edge magnitude was too close to transaction cost. The H2 strict candidate passed the hard D2 gates, showed roughly a 53% win rate, and was robust under perturbation, but the realized return was approximately flat after spread. This is not a parameter tuning problem. It is an architectural boundary.
 
 The original strategy family used ridge bootstrap, cross-sectional ranking, and 15-minute FX signals. The loop tried to make it trade, then tried to make it robust, then tried to make it less overfit to forced participation. We learned that lowering thresholds can create activity without creating edge. Forced participation increased trade count but flattened conviction. A better version needed either a different target formulation, such as absolute forward return, or context features such as recent one-hour momentum and volatility.
 
-One important meta-discovery was about evaluation itself. Before D2 was fully wired, the Brain repeatedly proposed confidence-threshold edits. That was Goodhart's Law in miniature: the system optimizes whatever report it sees. If the report only exposes old Filter 1/2/3 diagnostics, the Brain learns to manipulate those. Once D2 was implemented, the Brain had a richer objective: gates first, binding second, objective third, robustness as override. In a self-improving loop, the evaluation report is not paperwork. It is the reward interface.
+One important meta-discovery was about evaluation itself. Before D2 was fully wired, the Brain repeatedly proposed confidence-threshold edits. That was Goodhart's Law in miniature: the system optimizes whatever report it sees. If the report only exposes old Filter 1/2/3 diagnostics, the Brain learns to manipulate those. Once D2 was implemented, the Brain had a richer objective: gates first, binding second, objective third, robustness as override. In a self-evolving loop, the evaluation report is not paperwork. It is the reward interface.
 
 ## 4. Live Deployment and Profit Harvester
 
 The live deployment path used MT5 with a single Risk Gate protecting automated order submission. The Risk Gate records every order request, every check result, the final decision, and any MT5 response to JSONL. The exported demo data contains 12,619 logged Risk Gate decisions.
 
-The deployed profit harvester was intentionally simple. It used principal-defined direction locks, fixed lot sizes, a $5 take-profit threshold, cooldown, and retrace-based re-entry. It polled at one-second cadence. This was not the self-improving loop's final strategy. It was a live execution mechanism designed to test whether a small, rule-consistent executor could repeatedly harvest local movement under institutional governance.
+The deployed profit harvester was intentionally simple. It used principal-defined direction locks, fixed lot sizes, a $5 take-profit threshold, cooldown, and retrace-based re-entry. It polled at one-second cadence. This was not the self-evolving loop's final strategy. It was a live execution mechanism designed to test whether a small, rule-consistent executor could repeatedly harvest local movement under institutional governance.
 
 The result was positive and auditable. The export attributes approximately +$494.98 realized PnL to `magic=10181` and `comment=profit_harvester`. The exact count depends on whether one counts deals, order pairs, or strategy lifecycle events, but the key point is attribution: automated harvester activity can be separated cleanly from manual/client-side activity by MT5 `magic` and `comment`.
 
@@ -68,7 +68,7 @@ The next layer is principal protection. Manual exposure caps should be enforced 
 
 On the strategy side, the next target is absolute-return formulation. Cross-sectional rank helped structure FX decisions, but it may discard magnitude information. A candidate that predicts absolute forward return could size by expected edge over spread instead of relative rank. We would also add momentum context: recent one-hour growth, realized volatility, and distance from local extremes. Finally, we would move from a single 15-minute horizon to a multi-horizon ensemble across 15-minute, 1-hour, and 4-hour views.
 
-On the self-improvement side, the D2 report should remain the Brain's contract. Every future loop iteration should consume the same machine-readable D2 JSON and produce a structured hypothesis tied to failed gates, weak binding, or robustness concerns.
+On the self-evolution side, the D2 report should remain the Brain's contract. Every future loop iteration should consume the same machine-readable D2 JSON and produce a structured hypothesis tied to failed gates, weak binding, or robustness concerns.
 
 ## 8. Lessons Learned
 
