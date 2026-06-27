@@ -103,6 +103,27 @@
     .positive { color: #62e38f; font-weight: 700; }
     .negative { color: #ff8c83; font-weight: 700; }
     .note { margin-top: 12px; color: var(--muted); }
+    .scroll {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--card);
+    }
+    .memory-table { min-width: 1080px; }
+    .memory-table td:last-child { color: var(--muted); min-width: 300px; }
+    .workbench-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 18px; }
+    pre {
+      margin: 0;
+      padding: 16px;
+      max-height: 360px;
+      overflow: auto;
+      white-space: pre-wrap;
+      background: #07111e;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: #dce7f5;
+      font: 13px/1.45 Consolas, Menlo, monospace;
+    }
     .split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
     .card { padding: 22px; }
     .card.green { border-color: rgba(31,164,99,.52); background: linear-gradient(180deg, rgba(31,164,99,.14), transparent), var(--card); }
@@ -122,6 +143,7 @@
     footer { padding: 36px 0 52px; color: var(--muted); text-align: center; border-top: 1px solid var(--line); }
     @media (max-width: 820px) {
       .stats, .tree, .split { grid-template-columns: 1fr; }
+      .workbench-grid { grid-template-columns: 1fr; }
       .band { grid-template-columns: 1fr; }
       .cells { grid-template-columns: 1fr 1fr; }
       th, td { font-size: .92rem; padding: 10px 8px; }
@@ -234,6 +256,111 @@
         <div class="tree-item pass"><h3>H2 strict</h3><p>98 trades, RD=100, robust, near spread-cost boundary.</p><span class="tag">selected</span></div>
         <div class="tree-item live"><h3>deployed</h3><p>Risk Gate production path, JSONL observability.</p><span class="tag">live</span></div>
         <div class="tree-item live"><h3>harvester</h3><p>Fixed-direction executor with $5 take-profit cycles.</p><span class="tag">evidence</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>System workbench snapshots</h2>
+      <p class="note">Static render of the original localhost demo UI sources: `data/strategy_memory.db`, `logs/loop_batch_20260625_152418_summary.json`, and sandbox D2 validation outputs. This is the system's actual working trace, not a reconstructed slide.</p>
+      <div class="workbench-grid" style="margin-top:18px">
+        <div class="card">
+          <h3>SQLite Memory Table</h3>
+          <p class="note">37 candidate records stored by the self-improving loop. The table shows branch lineage, D2 decision, modification type, and the short interpretation used for demo narration.</p>
+        </div>
+        <div class="card">
+          <h3>Rendered evidence sources</h3>
+          <ul>
+            <li>`data/strategy_memory.db` candidate memory</li>
+            <li>`logs/loop_iterations_*.jsonl` agent step traces</li>
+            <li>`sandboxes/*/validation_result.json` D2 reports</li>
+            <li>`reports/demo_data_*/risk_gate_decisions.csv` live audit</li>
+          </ul>
+        </div>
+      </div>
+      <div class="scroll" style="margin-top:18px">
+        <table class="memory-table">
+          <thead><tr><th>Candidate</th><th>Parent</th><th>Decision</th><th>Type</th><th>Trades</th><th>Risk</th><th>Return</th><th>What it means</th></tr></thead>
+          <tbody>
+            <tr><td>v_30021ae2</td><td>v0</td><td>KEEP</td><td>Level_2</td><td>-</td><td>100</td><td>0</td><td>Relaxed destroyer filter so symbols could enter the tradable set.</td></tr>
+            <tr><td>v_ef03fdaa</td><td>v0</td><td>KEEP</td><td>Level_2</td><td>-</td><td>100</td><td>0</td><td>Relaxed destroyer filter so symbols could enter the tradable set.</td></tr>
+            <tr><td>v_46af7531</td><td>v0</td><td>KEEP</td><td>Level_2</td><td>-</td><td>100</td><td>0</td><td>Relaxed destroyer filter so symbols could enter the tradable set.</td></tr>
+            <tr><td>v_4f00b926</td><td>v0</td><td>KEEP</td><td>Level_1</td><td>-</td><td>100</td><td>0</td><td>Threshold mutation: attempted to turn a silent strategy into a binding one.</td></tr>
+            <tr><td>v0</td><td>ROOT</td><td>BASELINE</td><td>baseline</td><td>-</td><td>100</td><td>0</td><td>Baseline D2 reference: zero-trade failure became the first optimization target.</td></tr>
+            <tr><td>v_5f1e9d24</td><td>v0</td><td>REJECT</td><td>Level_2</td><td>-</td><td>100</td><td>0</td><td>Relaxed destroyer filter so symbols could enter the tradable set.</td></tr>
+            <tr><td>v_27afbd94</td><td>v0</td><td>REJECT</td><td>Level_1</td><td>-</td><td>100</td><td>0</td><td>Threshold mutation: attempted to turn a silent strategy into a binding one.</td></tr>
+            <tr><td>v_6f0d826c</td><td>v0</td><td>REJECT</td><td>Level_1</td><td>-</td><td>100</td><td>0</td><td>Threshold mutation: attempted to turn a silent strategy into a binding one.</td></tr>
+            <tr><td>v_0e77f782</td><td>v0</td><td>REJECT</td><td>Level_1</td><td>-</td><td>100</td><td>0</td><td>Rejected by D2 gate or risk discipline; useful negative evidence.</td></tr>
+            <tr><td>v_1c9299d5</td><td>v0</td><td>REJECT</td><td>Level_1</td><td>-</td><td>100</td><td>0</td><td>Threshold mutation: attempted to turn a silent strategy into a binding one.</td></tr>
+            <tr><td>v_8c38a0a4</td><td>v0</td><td>REJECT</td><td>Level_1</td><td>-</td><td>100</td><td>0</td><td>Threshold mutation: attempted to turn a silent strategy into a binding one.</td></tr>
+            <tr><td>v_90019994</td><td>v0</td><td>REJECT</td><td>Level_1</td><td>-</td><td>100</td><td>0</td><td>Rejected by D2 gate or risk discipline; useful negative evidence.</td></tr>
+            <tr><td>v_c98a858c</td><td>v0</td><td>REJECT</td><td>Level_2</td><td>-</td><td>100</td><td>0</td><td>Rejected by D2 gate or risk discipline; useful negative evidence.</td></tr>
+            <tr><td>v_1087203b</td><td>v0</td><td>REJECT</td><td>Level_1</td><td>-</td><td>100</td><td>0</td><td>Rejected by D2 gate or risk discipline; useful negative evidence.</td></tr>
+            <tr><td>v_72207e1a</td><td>v0</td><td>REJECT</td><td>Level_1</td><td>-</td><td>100</td><td>0</td><td>Threshold mutation: attempted to turn a silent strategy into a binding one.</td></tr>
+            <tr><td>v_b2822cd9</td><td>v0</td><td>REJECT</td><td>Level_1</td><td>-</td><td>100</td><td>0</td><td>Rejected by D2 gate or risk discipline; useful negative evidence.</td></tr>
+            <tr><td>v_b63cfa2f</td><td>v0</td><td>REJECT</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Threshold mutation: attempted to turn a silent strategy into a binding one.</td></tr>
+            <tr><td>v_776260b3</td><td>v_b63cfa2f</td><td>REJECT</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Rejected by D2 gate or risk discipline; useful negative evidence.</td></tr>
+            <tr><td>v_642461be</td><td>v_776260b3</td><td>REJECT</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Rejected by D2 gate or risk discipline; useful negative evidence.</td></tr>
+            <tr><td>v_2158d7d4</td><td>v_642461be</td><td>REJECT</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Rejected by D2 gate or risk discipline; useful negative evidence.</td></tr>
+            <tr><td>v_a77f5bdf</td><td>v_2158d7d4</td><td>REJECT</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Rejected by D2 gate or risk discipline; useful negative evidence.</td></tr>
+            <tr><td>v_2d47fa90</td><td>v_a77f5bdf</td><td>REJECT</td><td>Level_1</td><td>34</td><td>90</td><td>-0.000229219</td><td>Rejected by D2 gate or risk discipline; useful negative evidence.</td></tr>
+            <tr><td>v_b2e2426d</td><td>v_2d47fa90</td><td>REJECT</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Threshold mutation: attempted to turn a silent strategy into a binding one.</td></tr>
+            <tr><td>v_0b426c4d</td><td>v_b2e2426d</td><td>REJECT</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Rejected by D2 gate or risk discipline; useful negative evidence.</td></tr>
+            <tr><td>v_910f7cf9</td><td>v_0b426c4d</td><td>REJECT</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Rejected by D2 gate or risk discipline; useful negative evidence.</td></tr>
+            <tr><td>v_54e99a84</td><td>v_910f7cf9</td><td>REJECT</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Threshold mutation: attempted to turn a silent strategy into a binding one.</td></tr>
+            <tr><td>v_a65041ff</td><td>v0</td><td>REJECT</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Rejected by D2 gate or risk discipline; useful negative evidence.</td></tr>
+            <tr><td>v_196226e1</td><td>v0</td><td>KEEP</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Kept as branch navigation memory for the next hypothesis.</td></tr>
+            <tr><td>v_a35783c0</td><td>v_196226e1</td><td>KEEP</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Threshold mutation: attempted to turn a silent strategy into a binding one.</td></tr>
+            <tr><td>v_06240825</td><td>v_a35783c0</td><td>KEEP</td><td>Level_2</td><td>45</td><td>90</td><td>-0.000546659</td><td>Relaxed destroyer filter so symbols could enter the tradable set.</td></tr>
+            <tr><td>v_4caa41ff</td><td>v_06240825</td><td>KEEP</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Kept as branch navigation memory for the next hypothesis.</td></tr>
+            <tr><td>v_87ff6a10</td><td>v_4caa41ff</td><td>KEEP</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Kept as branch navigation memory for the next hypothesis.</td></tr>
+            <tr><td>v_cea70ca9</td><td>v_87ff6a10</td><td>KEEP</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Predictor-side mutation: tested whether signal generation, not sizing, was the bottleneck.</td></tr>
+            <tr><td>v_dd98fabd</td><td>v_cea70ca9</td><td>KEEP</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Kept as branch navigation memory for the next hypothesis.</td></tr>
+            <tr><td>v_fad9d3aa</td><td>v_dd98fabd</td><td>KEEP</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Kept as branch navigation memory for the next hypothesis.</td></tr>
+            <tr><td>v_65c74434</td><td>v_fad9d3aa</td><td>KEEP</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Threshold mutation: attempted to turn a silent strategy into a binding one.</td></tr>
+            <tr><td>v_7249872b</td><td>v_65c74434</td><td>KEEP</td><td>Level_1</td><td>45</td><td>90</td><td>-0.000546659</td><td>Threshold mutation: attempted to turn a silent strategy into a binding one.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="workbench-grid" style="margin-top:18px">
+        <div>
+          <h3>Loop output excerpt</h3>
+          <pre>{
+  "id": "27afbd94",
+  "hypothesis": {"confidence_threshold": {"old": 0.5, "new": 0.2}},
+  "trade_count": 0,
+  "risk": "100",
+  "d2_decision": "REJECT",
+  "navigator": {
+    "model": "mistralai/mistral-nemotron",
+    "real_call": true,
+    "fallback_used": true,
+    "fallback_model": "nvidia/nemotron-3-nano-30b-a3b",
+    "error": "APITimeoutError: Request timed out."
+  },
+  "architect": {
+    "model": "nvidia/nemotron-3-super-120b-a12b",
+    "real_call": true,
+    "attempt": 2,
+    "fallback_used": false
+  },
+  "coder_fallback": false
+}</pre>
+        </div>
+        <div>
+          <h3>H2 strict D2 gate snapshot</h3>
+          <table>
+            <thead><tr><th>Gate</th><th>Threshold</th><th>Value</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>MaxDD</td><td>&lt; 30%</td><td>0.002749%</td><td class="positive">PASS</td></tr>
+              <tr><td>Risk Discipline</td><td>= 100</td><td>100</td><td class="positive">PASS</td></tr>
+              <tr><td>Trade Count</td><td>&gt;= 30</td><td>98</td><td class="positive">PASS</td></tr>
+              <tr><td>Active Intervals</td><td>&gt;= 8</td><td>36</td><td class="positive">PASS</td></tr>
+            </tbody>
+          </table>
+          <p class="note">Decision: KEEP previous candidate for live alpha purposes; H2 strict was robust and directionally informative, but total return was slightly negative after costs.</p>
+        </div>
       </div>
     </div>
   </section>

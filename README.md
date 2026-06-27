@@ -2,7 +2,7 @@
 
 > **🌐 [Live Demo](https://brishian427.github.io/Triofolium/) 🌐**
 >
-> A self-improving algorithmic trading system with institutional risk governance.
+> A self-improving algorithmic trading system with institutional risk governance. Includes static renders of the strategy tree, SQLite memory table, D2 gates, and live audit trail.
 
 Project Trifolium is a self-improving algorithmic trading system built for the MOMQ Finals Tech Prize. It combines a multi-LLM strategy discovery loop, an institutional Risk Gate, MT5 live execution, D2 evaluation reports, and a deployed profit harvester that produced auditable live trading evidence during the competition.
 
