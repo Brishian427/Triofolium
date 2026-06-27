@@ -331,25 +331,48 @@
         <div>
           <h3>Loop output excerpt</h3>
           <pre>{
-  "id": "27afbd94",
-  "hypothesis": {"confidence_threshold": {"old": 0.5, "new": 0.2}},
-  "trade_count": 0,
-  "risk": "100",
-  "d2_decision": "REJECT",
-  "navigator": {
-    "model": "mistralai/mistral-nemotron",
-    "real_call": true,
-    "fallback_used": true,
-    "fallback_model": "nvidia/nemotron-3-nano-30b-a3b",
-    "error": "APITimeoutError: Request timed out."
+  "iteration_id": "7249872b",
+  "source_log": "logs/loop_iterations_7249872b.jsonl",
+  "input_to_brain": {
+    "parent": "v_65c74434",
+    "report_chars": 6351,
+    "d2_context": "Section 2 Gate Check + Section 5 Binding Check"
   },
-  "architect": {
-    "model": "nvidia/nemotron-3-super-120b-a12b",
-    "real_call": true,
-    "attempt": 2,
-    "fallback_used": false
+  "brain_reasoning": {
+    "rationale": "Address D2 Section 2 Gate failure where Trade Count = 0 (<30). Lowering the confidence threshold in the YAML config enables more signals to pass, encouraging trade creation while maintaining risk discipline.",
+    "target_files": ["src/trifolium/strategy/config/strategy_v0.yaml"],
+    "hypothesis": {"confidence_threshold": {"old": 0.7, "new": 0.5}},
+    "expected_metric_change": {"Trade Count": 5}
   },
-  "coder_fallback": false
+  "agent_calls": {
+    "navigator": {
+      "model": "mistralai/mistral-nemotron",
+      "real_call": true,
+      "fallback_used": false
+    },
+    "architect": {
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "real_call": true,
+      "attempt": 3,
+      "fallback_used": false
+    },
+    "coder": {
+      "provider": "anthropic",
+      "real_call": true,
+      "fallback_used": false
+    }
+  },
+  "institutional_checks": {
+    "guardrail_passed": true,
+    "scope_check_passed": true
+  },
+  "d2_feedback": {
+    "trade_count": 45,
+    "risk_discipline": 90,
+    "binding_verdict": "DEAD CODE",
+    "decision": "NO-OP",
+    "next_experiment": "Make a binding modification that changes position path or fill pattern."
+  }
 }</pre>
         </div>
         <div>
