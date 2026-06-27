@@ -170,7 +170,7 @@
     <div class="wrap">
       <h2>How the loop works</h2>
       <div class="svg-panel">
-        <svg viewBox="0 0 980 340" role="img" aria-label="Self improving loop diagram">
+        <svg viewBox="0 0 980 380" role="img" aria-label="Self improving loop diagram">
           <defs>
             <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
               <path d="M0,0 L0,6 L9,3 z" fill="#1FA463"></path>
@@ -181,6 +181,8 @@
               .sub{fill:#aab7c7;font-family:Book Antiqua,Georgia,serif;font-size:14px}
               .arr{stroke:#1FA463;stroke-width:3;fill:none;marker-end:url(#arrow)}
               .dash{stroke:#D4A843;stroke-width:3;fill:none;stroke-dasharray:8 8;marker-end:url(#arrow)}
+              .feedback-pill{fill:#101d2f;stroke:#D4A843;stroke-width:1.4;rx:10}
+              .feedback-label{fill:#D4A843;font-family:Book Antiqua,Georgia,serif;font-size:17px;font-weight:700}
             </style>
           </defs>
           <rect x="20" y="95" width="150" height="95" class="box"></rect>
@@ -202,8 +204,10 @@
           <path d="M370 142 H420" class="arr"></path>
           <path d="M570 142 H620" class="arr"></path>
           <path d="M770 142 H820" class="arr"></path>
-          <path d="M890 95 C890 28 95 28 95 95" class="dash"></path>
-          <text x="490" y="52" text-anchor="middle" fill="#D4A843" font-family="Book Antiqua,Georgia,serif" font-size="18">feedback: accepted/rejected candidates shape the next branch</text>
+          <rect x="295" y="22" width="390" height="34" class="feedback-pill"></rect>
+          <text x="490" y="45" text-anchor="middle" class="feedback-label">feedback shapes the next branch</text>
+          <path d="M890 94 C860 72 690 65 565 67 M415 67 C285 68 145 78 105 94" class="dash"></path>
+          <text x="490" y="78" text-anchor="middle" fill="#aab7c7" font-family="Book Antiqua,Georgia,serif" font-size="13">accepted / rejected candidates update memory</text>
         </svg>
       </div>
     </div>
