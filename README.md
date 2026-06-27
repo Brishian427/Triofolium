@@ -4,6 +4,8 @@ Project Trifolium is a self-improving algorithmic trading system built for the M
 
 ## Architecture
 
+Full architecture notes: [docs/architecture.md](docs/architecture.md)
+
 ```mermaid
 flowchart LR
     A["Navigator<br/>Mistral Nemotron"] --> B["Architect<br/>NVIDIA Nemotron Super 120B"]
@@ -18,7 +20,7 @@ flowchart LR
     I --> F
 ```
 
-## Key Results
+## Results Summary
 
 - Explored 8 strategy candidates through the self-improving loop.
 - Implemented the D2 9-section evaluation framework: Identity, Gate Check, Primary Objective, Secondary Metrics, Binding Check, Robustness, Regime Consistency, Failure Modes, Decision.
@@ -27,6 +29,12 @@ flowchart LR
 - Implemented 7 hard-kill layers during live deployment: margin floor, single-instrument loss, total unrealized loss, drawdown, per-trade volume cap, session-total loss floor, and anomaly trade-count detection.
 - Discovered a live constitutional refinement: rate-limit policy must be direction-aware so safety checks do not block legitimate closing/reducing orders.
 - Produced a full audit export separating automated activity from manual/client-side activity by MT5 `magic` and `comment`.
+
+## Project Writeup
+
+Long-form technical writeup: [docs/writeup.md](docs/writeup.md)
+
+Short submission description: [docs/submission_description.txt](docs/submission_description.txt)
 
 ## System Components
 
@@ -85,7 +93,7 @@ Latest export snapshot:
 - Broker/server shown by MT5: FTWorldwide-MainTrade
 - Original system objective: build a live self-improving trading institution rather than a single hand-written strategy.
 
-## Setup
+## Quick Start
 
 ```powershell
 python -m venv .venv
